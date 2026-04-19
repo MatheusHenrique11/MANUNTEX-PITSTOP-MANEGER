@@ -31,10 +31,8 @@ public class StorageConfig {
     public S3Client s3Client() {
         var builder = S3Client.builder()
             .region(Region.of(region))
-            // Ativar criptografia SSE-S3 por padrão no bucket (configurado via IaC/console AWS)
             .serviceConfiguration(s -> s.checksumValidationEnabled(true));
 
-        // Em dev, aponta para MinIO local
         if (endpoint != null && !endpoint.isBlank()) {
             builder.endpointOverride(URI.create(endpoint))
                    .forcePathStyle(true)
@@ -45,7 +43,6 @@ public class StorageConfig {
                        )
                    ));
         } else {
-            // Em produção usa IAM Role / variáveis de ambiente padrão da AWS
             builder.credentialsProvider(DefaultCredentialsProvider.create());
         }
 

@@ -17,9 +17,9 @@ class RenavamValidatorTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-        "00258665590",  // 11 dígitos válido
-        "258665590",    // 9 dígitos válido (mesmo RENAVAM)
-        "01234567890"
+        "00258665599",  // 11 dígitos válido (dígito verificador=9)
+        "258665599",    // 9 dígitos válido (mesmo RENAVAM sem zeros à esquerda)
+        "01234567897"   // 11 dígitos válido (dígito verificador=7)
     })
     void deveAceitarRenavamValido(String renavam) {
         assertThat(validator.isValid(renavam, null)).isTrue();
@@ -27,8 +27,8 @@ class RenavamValidatorTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-        "00000000000",  // todos zeros
-        "12345678901",  // dígito verificador errado
+        "00000000000",  // todos zeros — inválido
+        "12345678901",  // dígito verificador errado (correto seria 0)
         "1234",         // muito curto
         "abc",          // não numérico
         ""

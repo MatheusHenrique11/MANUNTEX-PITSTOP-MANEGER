@@ -9,6 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -23,6 +25,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class DocumentoServiceTest {
 
     @Mock private DocumentoRepository documentoRepository;
@@ -39,11 +42,9 @@ class DocumentoServiceTest {
 
     private User mockUser;
     private UUID veiculoId;
-    private UUID userId;
 
     @BeforeEach
     void setUp() {
-        userId = UUID.randomUUID();
         veiculoId = UUID.randomUUID();
 
         mockUser = User.builder()
@@ -53,7 +54,6 @@ class DocumentoServiceTest {
             .role(UserRole.ROLE_MECANICO)
             .build();
 
-        // Configura SecurityContext com usuário autenticado
         Authentication auth = mock(Authentication.class);
         when(auth.getName()).thenReturn("mecanico@pitstop.com");
         SecurityContext secCtx = mock(SecurityContext.class);
@@ -61,6 +61,7 @@ class DocumentoServiceTest {
         SecurityContextHolder.setContext(secCtx);
 
         when(userRepository.findByEmail("mecanico@pitstop.com")).thenReturn(Optional.of(mockUser));
+        when(clienteRepository.findById(any())).thenReturn(Optional.of(new com.manutex.pitstop.domain.entity.Cliente()));
     }
 
     @Test
@@ -70,7 +71,7 @@ class DocumentoServiceTest {
         MockMultipartFile file = new MockMultipartFile("file", "crlv.pdf", "application/pdf", pdfBytes);
 
         Veiculo veiculo = Veiculo.builder().placa("ABC1234").chassi("9BWZZZ377VT004251")
-            .renavam("00258665590").marca("VW").modelo("Gol").anoFabricacao(2020).anoModelo(2021).build();
+            .renavam("00258665599").marca("VW").modelo("Gol").anoFabricacao(2020).anoModelo(2021).build();
 
         when(veiculoRepository.findById(veiculoId)).thenReturn(Optional.of(veiculo));
         when(checksumService.sha256Hex(pdfBytes)).thenReturn("abc123hash");
@@ -94,7 +95,7 @@ class DocumentoServiceTest {
     @Test
     void deveRejeitarSeValidacaoPdfFalhar() {
         MockMultipartFile malware = new MockMultipartFile("file", "malware.pdf", "application/pdf",
-            new byte[]{0x4D, 0x5A});  // cabeçalho MZ (exe)
+            new byte[]{0x4D, 0x5A});
 
         doThrow(new PdfMagicNumberValidator.InvalidDocumentException("Não é PDF"))
             .when(pdfValidator).validate(malware);
@@ -111,11 +112,12 @@ class DocumentoServiceTest {
         MockMultipartFile file = new MockMultipartFile(
             "file", "../../etc/passwd.pdf", "application/pdf", pdfBytes);
 
+        UUID clienteId = UUID.randomUUID();
         when(checksumService.sha256Hex(any())).thenReturn("hash");
         when(encryptionService.encrypt(any())).thenReturn(new byte[0]);
         when(documentoRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        var response = service.upload(file, TipoDocumento.OUTRO, null, null, null);
+        var response = service.upload(file, TipoDocumento.OUTRO, null, clienteId, null);
 
         // Path traversal deve ser sanitizado
         assertThat(response.nomeOriginal()).doesNotContain("..");
@@ -195,6 +197,7 @@ class DocumentoServiceTest {
         byte[] pdfBytes = "%PDF-1.4".getBytes();
         MockMultipartFile file = new MockMultipartFile("file", "doc.pdf", "application/pdf", pdfBytes);
 
+        UUID clienteId = UUID.randomUUID();
         when(checksumService.sha256Hex(any())).thenReturn("hash");
         when(encryptionService.encrypt(any())).thenReturn(new byte[0]);
         when(documentoRepository.save(any())).thenAnswer(inv -> {
@@ -204,10 +207,9 @@ class DocumentoServiceTest {
             return d;
         });
 
-        var response = service.upload(file, TipoDocumento.OUTRO, null, null, null);
+        var response = service.upload(file, TipoDocumento.OUTRO, null, clienteId, null);
 
-        // DocumentoResponse não deve ter storageKey - campo não existe no record
-        // (garantido pelo design do DTO)
+        // DocumentoResponse não deve ter storageKey — garantido pelo design do DTO
         assertThat(response).isNotNull();
     }
 }

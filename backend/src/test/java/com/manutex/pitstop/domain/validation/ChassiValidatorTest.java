@@ -17,7 +17,7 @@ class ChassiValidatorTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-        "9BWZZZ377VT004251",   // VIN brasileiro válido
+        "9BWZZZ372VT004251",   // VIN brasileiro válido (dígito verificador '2' na pos 8)
         "1HGBH41JXMN109186",   // VIN norte-americano válido
         "WBA3A5G59DNP26082",   // VIN alemão válido (BMW)
     })
@@ -41,8 +41,8 @@ class ChassiValidatorTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-        "9bwzzz377vt004251",   // minúsculo deve ser aceito (normaliza para maiúsculo)
-        "9BWZZZ377vt004251",   // misto
+        "9bwzzz372vt004251",   // minúsculo deve ser aceito (normaliza para maiúsculo)
+        "9BWZZZ372vt004251",   // misto
     })
     void deveAceitarChassiEmMinusculo(String chassi) {
         assertThat(validator.isValid(chassi, null)).isTrue();

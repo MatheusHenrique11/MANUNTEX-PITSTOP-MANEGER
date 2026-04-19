@@ -1,8 +1,10 @@
 package com.manutex.pitstop.web.exception;
 
-import com.manutex.pitstop.service.AuthService;
 import com.manutex.pitstop.service.AesEncryptionService;
+import com.manutex.pitstop.service.AuthService;
 import com.manutex.pitstop.service.DocumentoService;
+import com.manutex.pitstop.service.EmpresaConfigService;
+import com.manutex.pitstop.service.ManutencaoService;
 import com.manutex.pitstop.service.PdfMagicNumberValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -20,12 +22,6 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-/**
- * Centraliza o mapeamento de exceções para respostas HTTP seguindo RFC 7807 (ProblemDetail).
- *
- * IMPORTANTE: mensagens de erro nunca expõem stack traces ou detalhes internos ao cliente.
- * Logs completos ficam no servidor.
- */
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -38,7 +34,6 @@ public class GlobalExceptionHandler {
                 fe -> fe.getDefaultMessage() != null ? fe.getDefaultMessage() : "inválido",
                 (a, b) -> a
             ));
-
         ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_ENTITY);
         problem.setTitle("Dados inválidos");
         problem.setType(URI.create("https://pitstop.manutex.com/errors/validation"));
@@ -85,7 +80,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DocumentoService.DocumentoIntegrityException.class)
     public ResponseEntity<ProblemDetail> handleIntegrity(DocumentoService.DocumentoIntegrityException ex) {
-        // Log crítico no servidor, mensagem genérica para o cliente
         log.error("ALERTA DE SEGURANÇA - falha de integridade de documento: {}", ex.getMessage());
         ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         problem.setTitle("Erro de integridade");
@@ -102,6 +96,24 @@ public class GlobalExceptionHandler {
         problem.setDetail("Não foi possível processar o documento.");
         problem.setProperty("timestamp", Instant.now());
         return ResponseEntity.internalServerError().body(problem);
+    }
+
+    @ExceptionHandler(ManutencaoService.StatusTransitionException.class)
+    public ResponseEntity<ProblemDetail> handleStatusTransition(ManutencaoService.StatusTransitionException ex) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_ENTITY);
+        problem.setTitle("Transição de status inválida");
+        problem.setDetail(ex.getMessage());
+        problem.setProperty("timestamp", Instant.now());
+        return ResponseEntity.unprocessableEntity().body(problem);
+    }
+
+    @ExceptionHandler(EmpresaConfigService.LogoUploadException.class)
+    public ResponseEntity<ProblemDetail> handleLogoUpload(EmpresaConfigService.LogoUploadException ex) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_ENTITY);
+        problem.setTitle("Logo inválido");
+        problem.setDetail(ex.getMessage());
+        problem.setProperty("timestamp", Instant.now());
+        return ResponseEntity.unprocessableEntity().body(problem);
     }
 
     @ExceptionHandler(Exception.class)

@@ -23,6 +23,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -35,24 +36,17 @@ public class SecurityConfig {
     private final RateLimitFilter rateLimitFilter;
 
     @Value("${app.cors.allowed-origins}")
-    private String allowedOrigin;
+    private String allowedOrigins;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // ── CSRF desabilitado: API stateless com JWT em cookie HTTP-Only
             .csrf(AbstractHttpConfigurer::disable)
-
-            // ── CORS estrito — apenas a origem do Angular
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-            // ── Sem sessão no servidor
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-            // ── Security headers (OWASP)
             .headers(headers -> headers
                 .frameOptions(frame -> frame.deny())
-                .xssProtection(xss -> xss.disable())             // CSP cobre isso
+                .xssProtection(xss -> xss.disable())
                 .contentSecurityPolicy(csp -> csp.policyDirectives(
                     "default-src 'self'; frame-ancestors 'none'; form-action 'self'"
                 ))
@@ -63,16 +57,12 @@ public class SecurityConfig {
                     "camera=(), microphone=(), geolocation=()"
                 ))
             )
-
-            // ── Autorização de rotas
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
                 .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers("/admin/toggles/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
-
-            // ── Filtros personalizados
             .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -81,12 +71,17 @@ public class SecurityConfig {
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
+        List<String> origins = Arrays.stream(allowedOrigins.split(","))
+            .map(String::trim)
+            .filter(s -> !s.isEmpty())
+            .toList();
+
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(List.of(allowedOrigin));
+        config.setAllowedOriginPatterns(origins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
         config.setExposedHeaders(List.of("X-RateLimit-Remaining"));
-        config.setAllowCredentials(true);   // necessário para cookies HTTP-Only
+        config.setAllowCredentials(true);
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

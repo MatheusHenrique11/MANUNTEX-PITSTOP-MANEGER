@@ -19,7 +19,7 @@ class ChecksumServiceTest {
         // SHA-256 de "abc" é conhecido
         byte[] data = "abc".getBytes();
         String hash = service.sha256Hex(data);
-        assertThat(hash).isEqualTo("ba7816bf8f01cfea414140de5dae2ec73b00361bbef0469f492c5c71aef0a5d3");
+        assertThat(hash).isEqualTo("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
     }
 
     @Test

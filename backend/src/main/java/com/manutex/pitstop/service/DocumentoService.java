@@ -168,7 +168,9 @@ public class DocumentoService {
      * Formato: docs/{uuid}/{uuid-único}
      */
     private String buildStorageKey(TipoDocumento tipo, UUID veiculoId, UUID clienteId) {
-        String owner = veiculoId != null ? veiculoId.toString() : clienteId.toString();
+        String owner = veiculoId != null ? veiculoId.toString()
+                     : clienteId != null ? clienteId.toString()
+                     : UUID.randomUUID().toString();
         return String.format("docs/%s/%s", owner, UUID.randomUUID());
     }
 

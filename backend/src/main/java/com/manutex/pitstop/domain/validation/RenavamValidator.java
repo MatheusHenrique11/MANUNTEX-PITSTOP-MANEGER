@@ -24,6 +24,9 @@ public class RenavamValidator implements ConstraintValidator<Renavam, String> {
         }
         if (digits.length() != 11) return false;
 
+        // RENAVAM com todos os dígitos iguais a zero é inválido
+        if (digits.matches("0+")) return false;
+
         return validateCheckDigit(digits, WEIGHTS_11);
     }
 

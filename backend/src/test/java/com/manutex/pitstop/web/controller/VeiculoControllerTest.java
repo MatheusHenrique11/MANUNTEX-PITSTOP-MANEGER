@@ -1,7 +1,8 @@
 package com.manutex.pitstop.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.manutex.pitstop.config.AppFeatures;
+import com.manutex.pitstop.config.SecurityConfig;
+import com.manutex.pitstop.config.TestSecurityConfig;
 import com.manutex.pitstop.domain.entity.Cliente;
 import com.manutex.pitstop.domain.entity.Veiculo;
 import com.manutex.pitstop.domain.repository.ClienteRepository;
@@ -9,30 +10,46 @@ import com.manutex.pitstop.domain.repository.VeiculoRepository;
 import com.manutex.pitstop.security.JwtAuthenticationFilter;
 import com.manutex.pitstop.web.dto.VeiculoRequest;
 import com.manutex.pitstop.web.filter.RateLimitFilter;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
+import org.togglz.core.Feature;
+import org.togglz.core.context.FeatureContext;
+import org.togglz.core.manager.FeatureManager;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(controllers = VeiculoController.class)
+@WebMvcTest(
+    controllers = VeiculoController.class,
+    excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = SecurityConfig.class)
+)
+@Import(TestSecurityConfig.class)
 @MockBean(JpaMetamodelMappingContext.class)
 class VeiculoControllerTest {
 
@@ -44,11 +61,24 @@ class VeiculoControllerTest {
     @MockBean JwtAuthenticationFilter jwtAuthenticationFilter;
     @MockBean RateLimitFilter rateLimitFilter;
 
+    private FeatureManager featureManager;
+
+    @BeforeEach
+    void setUp() throws Exception {
+        featureManager = mock(FeatureManager.class);
+        when(featureManager.isActive(any(Feature.class))).thenReturn(true);
+
+        doAnswer(inv -> { inv.<FilterChain>getArgument(2).doFilter(inv.getArgument(0), inv.getArgument(1)); return null; })
+            .when(jwtAuthenticationFilter).doFilter(any(ServletRequest.class), any(ServletResponse.class), any(FilterChain.class));
+        doAnswer(inv -> { inv.<FilterChain>getArgument(2).doFilter(inv.getArgument(0), inv.getArgument(1)); return null; })
+            .when(rateLimitFilter).doFilter(any(ServletRequest.class), any(ServletResponse.class), any(FilterChain.class));
+    }
+
     private Veiculo veiculoMock() {
         return Veiculo.builder()
             .placa("ABC1234")
             .chassi("9BWZZZ377VT004251")
-            .renavam("00258665590")
+            .renavam("00258665599")
             .marca("Volkswagen")
             .modelo("Gol")
             .anoFabricacao(2020)
@@ -61,17 +91,17 @@ class VeiculoControllerTest {
     @Test
     @WithMockUser(roles = "MECANICO")
     void deveListarVeiculosComMasking() throws Exception {
-        try (MockedStatic<AppFeatures> featuresMock = Mockito.mockStatic(AppFeatures.class)) {
-            featuresMock.when(AppFeatures::values).thenReturn(AppFeatures.values());
+        Veiculo v = veiculoMock();
+        when(veiculoRepository.findAll(any(Pageable.class)))
+            .thenReturn(new PageImpl<>(List.of(v)));
 
-            Veiculo v = veiculoMock();
-            when(veiculoRepository.findAll(any(Pageable.class)))
-                .thenReturn(new PageImpl<>(List.of(v)));
+        try (MockedStatic<FeatureContext> ctxMock = Mockito.mockStatic(FeatureContext.class)) {
+            ctxMock.when(FeatureContext::getFeatureManager).thenReturn(featureManager);
 
             mockMvc.perform(get("/api/v1/veiculos"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].placa").value("ABC1234"))
-                // Chassis deve estar mascarado para MECANICO
+                // Chassi deve estar mascarado para MECANICO
                 .andExpect(jsonPath("$.content[0].chassi").value(org.hamcrest.Matchers.startsWith("*")));
         }
     }
@@ -79,12 +109,12 @@ class VeiculoControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void deveExporChassiCompletoParaAdmin() throws Exception {
-        try (MockedStatic<AppFeatures> featuresMock = Mockito.mockStatic(AppFeatures.class)) {
-            featuresMock.when(AppFeatures::values).thenReturn(AppFeatures.values());
+        Veiculo v = veiculoMock();
+        when(veiculoRepository.findAll(any(Pageable.class)))
+            .thenReturn(new PageImpl<>(List.of(v)));
 
-            Veiculo v = veiculoMock();
-            when(veiculoRepository.findAll(any(Pageable.class)))
-                .thenReturn(new PageImpl<>(List.of(v)));
+        try (MockedStatic<FeatureContext> ctxMock = Mockito.mockStatic(FeatureContext.class)) {
+            ctxMock.when(FeatureContext::getFeatureManager).thenReturn(featureManager);
 
             mockMvc.perform(get("/api/v1/veiculos"))
                 .andExpect(status().isOk())
@@ -94,8 +124,12 @@ class VeiculoControllerTest {
 
     @Test
     void deveRetornar401SemAutenticacao() throws Exception {
-        mockMvc.perform(get("/api/v1/veiculos"))
-            .andExpect(status().isUnauthorized());
+        try (MockedStatic<FeatureContext> ctxMock = Mockito.mockStatic(FeatureContext.class)) {
+            ctxMock.when(FeatureContext::getFeatureManager).thenReturn(featureManager);
+
+            mockMvc.perform(get("/api/v1/veiculos"))
+                .andExpect(status().isUnauthorized());
+        }
     }
 
     @Test
@@ -103,18 +137,18 @@ class VeiculoControllerTest {
     void deveCriarVeiculoComDadosValidos() throws Exception {
         UUID clienteId = UUID.randomUUID();
         VeiculoRequest request = new VeiculoRequest(
-            "ABC1234", "9BWZZZ377VT004251", "00258665590",
+            "ABC1234", "9BWZZZ372VT004251", "00258665599",
             "Volkswagen", "Gol", 2020, 2021, "Prata", clienteId
         );
 
         Cliente cliente = new Cliente();
         Veiculo veiculo = veiculoMock();
 
-        try (MockedStatic<AppFeatures> featuresMock = Mockito.mockStatic(AppFeatures.class)) {
-            featuresMock.when(AppFeatures::values).thenReturn(AppFeatures.values());
+        when(clienteRepository.findById(clienteId)).thenReturn(Optional.of(cliente));
+        when(veiculoRepository.save(any())).thenReturn(veiculo);
 
-            when(clienteRepository.findById(clienteId)).thenReturn(Optional.of(cliente));
-            when(veiculoRepository.save(any())).thenReturn(veiculo);
+        try (MockedStatic<FeatureContext> ctxMock = Mockito.mockStatic(FeatureContext.class)) {
+            ctxMock.when(FeatureContext::getFeatureManager).thenReturn(featureManager);
 
             mockMvc.perform(post("/api/v1/veiculos")
                     .with(csrf())
@@ -130,7 +164,7 @@ class VeiculoControllerTest {
     void deveRetornar422ParaPlacaInvalida() throws Exception {
         UUID clienteId = UUID.randomUUID();
         VeiculoRequest request = new VeiculoRequest(
-            "INVALIDA!", "9BWZZZ377VT004251", "00258665590",
+            "INVALIDA!", "9BWZZZ377VT004251", "00258665599",
             "VW", "Gol", 2020, 2021, "Prata", clienteId
         );
 

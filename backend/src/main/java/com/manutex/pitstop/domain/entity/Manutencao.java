@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -40,9 +41,27 @@ public class Manutencao extends BaseAuditEntity {
     @Column(nullable = false, columnDefinition = "TEXT")
     private String descricao;
 
+    @Size(max = 4000)
+    @Column(columnDefinition = "TEXT")
+    private String relatorio;
+
+    @DecimalMin("0.0")
+    @Digits(integer = 10, fraction = 2)
+    @Column(precision = 12, scale = 2)
+    private BigDecimal orcamento;
+
+    @DecimalMin("0.0")
+    @Digits(integer = 10, fraction = 2)
+    @Column(name = "valor_final", precision = 12, scale = 2)
+    private BigDecimal valorFinal;
+
     @PositiveOrZero
     @Column(name = "km_entrada")
     private Integer kmEntrada;
+
+    @PositiveOrZero
+    @Column(name = "km_saida")
+    private Integer kmSaida;
 
     @NotNull
     @Enumerated(EnumType.STRING)
@@ -62,7 +81,6 @@ public class Manutencao extends BaseAuditEntity {
     @Column(columnDefinition = "TEXT")
     private String observacoes;
 
-    /** Garante que data_conclusao é definida apenas quando status = CONCLUIDA */
     @PreUpdate
     @PrePersist
     private void validateConclusao() {
