@@ -1,0 +1,57 @@
+version: "3.9"
+
+services:
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: pitstop_postgres
+    environment:
+      POSTGRES_DB: pitstop_dev
+      POSTGRES_USER: pitstop
+      POSTGRES_PASSWORD: pitstop_dev_secret
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pitstop -d pitstop_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: pitstop_minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    ports:
+      - "9000:9000"   # API S3
+      - "9001:9001"   # Console web
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Cria o bucket automaticamente ao subir
+  minio-init:
+    image: minio/mc:latest
+    container_name: pitstop_minio_init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+        mc alias set local http://minio:9000 minioadmin minioadmin123;
+        mc mb --ignore-existing local/pitstop-docs-dev;
+        mc anonymous set private local/pitstop-docs-dev;
+        echo 'Bucket criado e configurado como privado';
+      "
+
+volumes:
+  postgres_data:
+  minio_data:

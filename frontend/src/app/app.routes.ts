@@ -1,0 +1,94 @@
+import { Routes } from '@angular/router';
+import { authGuard } from '@core/guards/auth.guard';
+import { roleGuard } from '@core/guards/role.guard';
+import { featureFlagGuard } from '@core/guards/feature-flag.guard';
+
+export const routes: Routes = [
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./features/auth/login/login.component').then(m => m.LoginComponent),
+  },
+
+  {
+    path: '',
+    loadComponent: () =>
+      import('./shared/components/layout/shell.component').then(m => m.ShellComponent),
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        redirectTo: 'veiculos',
+        pathMatch: 'full',
+      },
+
+      // ── Módulo: Gestão de Veículos ─────────────────────────────
+      {
+        path: 'veiculos',
+        canActivate: [featureFlagGuard],
+        data: { feature: 'VEHICLE_MANAGEMENT' },
+        children: [
+          {
+            path: '',
+            loadComponent: () =>
+              import('./features/veiculos/lista/veiculo-lista.component')
+                .then(m => m.VeiculoListaComponent),
+          },
+          {
+            path: 'novo',
+            loadComponent: () =>
+              import('./features/veiculos/form/veiculo-form.component')
+                .then(m => m.VeiculoFormComponent),
+          },
+          {
+            path: ':id',
+            loadComponent: () =>
+              import('./features/veiculos/form/veiculo-form.component')
+                .then(m => m.VeiculoFormComponent),
+          },
+        ],
+      },
+
+      // ── Módulo: Cofre de Documentos ───────────────────────────
+      {
+        path: 'documentos',
+        canActivate: [featureFlagGuard],
+        data: { feature: 'DOCUMENT_VAULT' },
+        children: [
+          {
+            path: 'upload',
+            loadComponent: () =>
+              import('./features/documentos/upload/documento-upload.component')
+                .then(m => m.DocumentoUploadComponent),
+          },
+          {
+            path: ':id/view',
+            loadComponent: () =>
+              import('./features/documentos/viewer/documento-viewer.component')
+                .then(m => m.DocumentoViewerComponent),
+          },
+        ],
+      },
+
+      // ── Admin: Controle de Módulos (Feature Flags) ─────────────
+      {
+        path: 'admin/modulos',
+        canActivate: [roleGuard],
+        data: { roles: ['ROLE_ADMIN'] },
+        loadComponent: () =>
+          import('./features/admin/feature-flags/feature-flags.component')
+            .then(m => m.FeatureFlagsComponent),
+      },
+
+      // ── Erro 403 ──────────────────────────────────────────────
+      {
+        path: '403',
+        loadComponent: () =>
+          import('./shared/components/layout/shell.component')
+            .then(m => m.ShellComponent),
+      },
+    ],
+  },
+
+  { path: '**', redirectTo: '' },
+];

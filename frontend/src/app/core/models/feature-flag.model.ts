@@ -1,0 +1,15 @@
+export type FeatureName =
+  | 'VEHICLE_MANAGEMENT'
+  | 'DOCUMENT_VAULT'
+  | 'MAINTENANCE_MODULE'
+  | 'ANALYTICS_DASHBOARD'
+  | 'NOTIFICATIONS'
+  | 'FINANCIAL_MODULE'
+  | 'DETRAN_INTEGRATION';
+
+export interface FeatureFlag {
+  active: boolean;
+  label: string;
+}
+
+export type FeatureFlagsMap = Record<FeatureName, FeatureFlag>;

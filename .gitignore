@@ -1,0 +1,17 @@
+# Segredos — NUNCA commitar
+.env
+.env.*
+*.env
+**/application-prod.yml
+**/application-staging.yml
+
+# Build artifacts
+**/target/
+**/dist/
+**/.angular/
+**/node_modules/
+
+# IDE
+.idea/
+.vscode/
+*.iml

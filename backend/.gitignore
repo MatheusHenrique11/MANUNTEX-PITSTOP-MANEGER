@@ -1,0 +1,24 @@
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+
+# Segredos — NUNCA commitar
+.env
+.env.local
+*.env
+application-prod.yml
+application-staging.yml
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+
+# Maven wrapper
+!.mvn/wrapper/maven-wrapper.jar

@@ -1,0 +1,26 @@
+# Perfil de desenvolvimento local — NÃO commitar segredos reais aqui
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/pitstop_dev
+    username: pitstop
+    password: pitstop_dev_secret
+
+  jpa:
+    properties:
+      hibernate:
+        format_sql: true
+    show-sql: false
+
+app:
+  jwt:
+    secret: dev_only_secret_must_be_replaced_in_prod_64chars_minimum_length!!
+  storage:
+    endpoint: http://localhost:9000
+    bucket: pitstop-docs-dev
+  cors:
+    allowed-origins: http://localhost:4200
+
+logging:
+  level:
+    com.manutex.pitstop: DEBUG
+    org.springframework.security: DEBUG
