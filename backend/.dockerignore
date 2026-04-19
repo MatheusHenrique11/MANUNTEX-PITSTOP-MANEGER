@@ -1,8 +1,0 @@
-target/
-.mvn/
-*.md
-.git/
-.gitignore
-docker-compose.yml
-**/*.log
-src/test/

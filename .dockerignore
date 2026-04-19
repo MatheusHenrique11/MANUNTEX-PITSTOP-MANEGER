@@ -1,0 +1,8 @@
+backend/target/
+backend/src/test/
+**/*.log
+*.md
+.git/
+.gitignore
+docker-compose.yml
+frontend/
