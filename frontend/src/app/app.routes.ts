@@ -76,6 +76,16 @@ export const routes: Routes = [
         ],
       },
 
+      // ── Admin: Gestão de Usuários ──────────────────────────────
+      {
+        path: 'admin/usuarios',
+        canActivate: [roleGuard],
+        data: { roles: ['ROLE_ADMIN'] },
+        loadComponent: () =>
+          import('./features/admin/usuarios/usuarios.component')
+            .then(m => m.UsuariosComponent),
+      },
+
       // ── Admin: Controle de Módulos (Feature Flags) ─────────────
       {
         path: 'admin/modulos',

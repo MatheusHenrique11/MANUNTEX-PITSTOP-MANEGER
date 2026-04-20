@@ -5,6 +5,7 @@ import com.manutex.pitstop.service.AuthService;
 import com.manutex.pitstop.service.DocumentoService;
 import com.manutex.pitstop.service.EmpresaConfigService;
 import com.manutex.pitstop.service.ManutencaoService;
+import com.manutex.pitstop.service.UserAdminService;
 import com.manutex.pitstop.service.PdfMagicNumberValidator;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -114,6 +115,15 @@ public class GlobalExceptionHandler {
         problem.setDetail(ex.getMessage());
         problem.setProperty("timestamp", Instant.now());
         return ResponseEntity.unprocessableEntity().body(problem);
+    }
+
+    @ExceptionHandler(UserAdminService.EmailJaCadastradoException.class)
+    public ResponseEntity<ProblemDetail> handleEmailDuplicado(UserAdminService.EmailJaCadastradoException ex) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        problem.setTitle("E-mail já cadastrado");
+        problem.setDetail(ex.getMessage());
+        problem.setProperty("timestamp", Instant.now());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
     }
 
     @ExceptionHandler(Exception.class)

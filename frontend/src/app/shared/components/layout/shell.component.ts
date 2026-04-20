@@ -134,6 +134,7 @@ export class ShellComponent {
     { label: 'Documentos',  path: '/documentos/upload', icon: '📄', feature: 'DOCUMENT_VAULT' },
     { label: 'Financeiro',  path: '/financeiro',   icon: '💰', feature: 'FINANCIAL_MODULE' },
     { label: 'Relatórios',  path: '/relatorios',   icon: '📊', feature: 'ANALYTICS_DASHBOARD' },
+    { label: 'Usuários',    path: '/admin/usuarios', icon: '👥', adminOnly: true },
     { label: 'Módulos',     path: '/admin/modulos', icon: '⚙', adminOnly: true },
   ];
 
