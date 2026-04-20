@@ -6,6 +6,7 @@ export interface AuthRequest {
 export interface AuthResponse {
   expiresIn: number;
   role: string;
+  email?: string;
 }
 
 export type UserRole =
@@ -16,6 +17,7 @@ export type UserRole =
 
 export interface AuthState {
   role: UserRole | null;
-  expiresAt: number | null;   // timestamp em ms
+  email: string | null;
+  expiresAt: number | null;
   isAuthenticated: boolean;
 }

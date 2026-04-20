@@ -18,12 +18,14 @@ export class AuthService {
 
   private readonly _state = signal<AuthState>({
     role: null,
+    email: null,
     expiresAt: null,
     isAuthenticated: false,
   });
 
   readonly isAuthenticated = computed(() => this._state().isAuthenticated);
   readonly role = computed(() => this._state().role);
+  readonly email = computed(() => this._state().email);
   readonly isAdmin = computed(() =>
     this._state().role === 'ROLE_ADMIN'
   );
@@ -45,7 +47,7 @@ export class AuthService {
     this.http.post<void>(`${this.apiUrl}/logout`, {}).pipe(
       catchError(() => EMPTY)
     ).subscribe(() => {
-      this._state.set({ role: null, expiresAt: null, isAuthenticated: false });
+      this._state.set({ role: null, email: null, expiresAt: null, isAuthenticated: false });
       this.router.navigate(['/login']);
     });
   }
@@ -59,6 +61,7 @@ export class AuthService {
   private applyAuthState(response: AuthResponse) {
     this._state.set({
       role: response.role as UserRole,
+      email: response.email ?? null,
       expiresAt: Date.now() + response.expiresIn * 1000,
       isAuthenticated: true,
     });
@@ -70,7 +73,7 @@ export class AuthService {
     // e o interceptor de erro irá redirecionar para /login.
     this.refreshToken().pipe(
       catchError(() => {
-        this._state.set({ role: null, expiresAt: null, isAuthenticated: false });
+        this._state.set({ role: null, email: null, expiresAt: null, isAuthenticated: false });
         return EMPTY;
       })
     ).subscribe();
