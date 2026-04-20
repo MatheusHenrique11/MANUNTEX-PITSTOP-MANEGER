@@ -9,5 +9,5 @@ import java.util.UUID;
 
 @Repository
 public interface EmpresaConfigRepository extends JpaRepository<EmpresaConfig, UUID> {
-    Optional<EmpresaConfig> findFirst();
+    Optional<EmpresaConfig> findFirstByOrderByUpdatedAtAsc();
 }
