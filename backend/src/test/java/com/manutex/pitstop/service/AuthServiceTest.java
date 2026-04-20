@@ -72,6 +72,7 @@ class AuthServiceTest {
 
         assertThat(response.accessToken()).isEqualTo("access.token.jwt");
         assertThat(response.role()).isEqualTo("ROLE_ADMIN");
+        assertThat(response.email()).isEqualTo("admin@pitstop.com");
         assertThat(response.expiresIn()).isEqualTo(900L);
     }
 

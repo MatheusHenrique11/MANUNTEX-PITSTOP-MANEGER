@@ -55,7 +55,7 @@ class AuthControllerTest {
     @Test
     void deveRetornarAuthResponseNoLogin() throws Exception {
         AuthRequest req = new AuthRequest("admin@test.com", "senha1234");
-        AuthResponse resp = new AuthResponse("jwt.access.token", 900L, "ROLE_ADMIN");
+        AuthResponse resp = new AuthResponse("jwt.access.token", 900L, "ROLE_ADMIN", "admin@test.com");
 
         when(authService.login(any())).thenReturn(resp);
         when(authService.loginAndGetRefreshToken(any())).thenReturn("raw_refresh_token");
@@ -68,6 +68,7 @@ class AuthControllerTest {
             .andExpect(jsonPath("$.accessToken").doesNotExist())
             .andExpect(jsonPath("$.expiresIn").value(900))
             .andExpect(jsonPath("$.role").value("ROLE_ADMIN"))
+            .andExpect(jsonPath("$.email").value("admin@test.com"))
             // Cookies HTTP-Only devem estar presentes
             .andExpect(cookie().exists("access_token"))
             .andExpect(cookie().httpOnly("access_token", true))
