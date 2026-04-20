@@ -1,15 +1,22 @@
 const fs = require('fs');
 const path = require('path');
 
-const envFile = path.join(__dirname, '../src/environments/environment.prod.ts');
+const targetDir = path.join(__dirname, '../src/environments');
+const targetFile = path.join(targetDir, 'environment.prod.ts');
 const backendUrl = (process.env.RAILWAY_BACKEND_URL || '').replace(/\/$/, '');
 
 if (!backendUrl) {
-  console.warn('[set-env] RAILWAY_BACKEND_URL não definido — usando placeholder vazio.');
+  console.warn('[set-env] RAILWAY_BACKEND_URL não definido — usando string vazia.');
 }
 
-let content = fs.readFileSync(envFile, 'utf8');
-content = content.replace('RAILWAY_BACKEND_URL', backendUrl);
-fs.writeFileSync(envFile, content);
+fs.mkdirSync(targetDir, { recursive: true });
+
+const content = `export const environment = {
+  production: true,
+  apiUrl: '${backendUrl}/api/v1',
+};
+`;
+
+fs.writeFileSync(targetFile, content, 'utf8');
 
 console.log(`[set-env] apiUrl configurado para: ${backendUrl}/api/v1`);
