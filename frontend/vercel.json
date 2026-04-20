@@ -1,5 +1,5 @@
 {
-  "buildCommand": "node scripts/set-env.js && npm run build:prod",
+  "buildCommand": "npm run build:vercel",
   "outputDirectory": "dist/pitstop-frontend/browser",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }

@@ -3,7 +3,6 @@ dist/
 .angular/
 *.env
 .env.local
-src/environments/environment.prod.ts
 
 .idea/
 .vscode/
