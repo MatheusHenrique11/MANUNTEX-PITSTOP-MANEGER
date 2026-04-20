@@ -48,7 +48,7 @@ public class AuthController {
             (int) (refreshTokenExpiryMs / 1000));
 
         // Body retorna apenas metadados (sem os tokens em texto)
-        return ResponseEntity.ok(new AuthResponse(null, authResponse.expiresIn(), authResponse.role()));
+        return ResponseEntity.ok(new AuthResponse(null, authResponse.expiresIn(), authResponse.role(), authResponse.email()));
     }
 
     @PostMapping("/refresh")
@@ -65,7 +65,7 @@ public class AuthController {
         addCookie(response, ACCESS_COOKIE, authResponse.accessToken(),
             (int) (accessTokenExpiryMs / 1000));
 
-        return ResponseEntity.ok(new AuthResponse(null, authResponse.expiresIn(), authResponse.role()));
+        return ResponseEntity.ok(new AuthResponse(null, authResponse.expiresIn(), authResponse.role(), authResponse.email()));
     }
 
     @PostMapping("/logout")
@@ -91,7 +91,7 @@ public class AuthController {
         cookie.setSecure(true);       // só em HTTPS
         cookie.setPath("/");
         cookie.setMaxAge(maxAgeSec);
-        cookie.setAttribute("SameSite", "Strict");
+        cookie.setAttribute("SameSite", "None");
         response.addCookie(cookie);
     }
 

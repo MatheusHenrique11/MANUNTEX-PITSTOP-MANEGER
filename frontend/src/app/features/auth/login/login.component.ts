@@ -216,7 +216,8 @@ export class LoginComponent {
       next: () => this.router.navigate(['/']),
       error: (err) => {
         this.loading.set(false);
-        this.errorMessage.set(err.detail ?? 'Credenciais inválidas. Tente novamente.');
+        const statusHint = err.status ? ` [${err.status}]` : '';
+        this.errorMessage.set(`${err.detail ?? 'Erro ao autenticar.'}${statusHint}`);
       },
     });
   }

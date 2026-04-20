@@ -29,7 +29,7 @@ class DataInitializer implements ApplicationRunner {
             PasswordEncoder encoder,
             @Value("${app.seed.enabled:false}") boolean enabled,
             @Value("${app.seed.email:turbofastgarage@pitstop.com}") String seedEmail,
-            @Value("${app.seed.password:#{null}}") String seedPassword) {
+            @Value("${app.seed.password:}") String seedPassword) {
         this.users = users;
         this.encoder = encoder;
         this.enabled = enabled;
@@ -41,7 +41,7 @@ class DataInitializer implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         if (!enabled) return;
 
-        if (seedPassword == null || seedPassword.isBlank()) {
+        if (seedPassword.isBlank()) {
             log.warn("[DataInitializer] app.seed.password não configurado — seed ignorado.");
             return;
         }

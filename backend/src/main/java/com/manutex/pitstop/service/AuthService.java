@@ -71,7 +71,8 @@ public class AuthService {
         return new AuthResponse(
             accessToken,
             accessTokenExpiryMs / 1000,
-            user.getRole().name()
+            user.getRole().name(),
+            user.getEmail()
         );
     }
 
@@ -116,7 +117,7 @@ public class AuthService {
                 .map(a -> a.getAuthority()).toList())
         );
 
-        return new AuthResponse(accessToken, accessTokenExpiryMs / 1000, user.getRole().name());
+        return new AuthResponse(accessToken, accessTokenExpiryMs / 1000, user.getRole().name(), user.getEmail());
     }
 
     @Transactional

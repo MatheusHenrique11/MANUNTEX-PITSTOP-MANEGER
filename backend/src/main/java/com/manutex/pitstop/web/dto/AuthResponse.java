@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record AuthResponse(
     String accessToken,
-    long expiresIn,     // segundos até expiração do access token
-    String role
+    long expiresIn,
+    String role,
+    String email
 ) {}
