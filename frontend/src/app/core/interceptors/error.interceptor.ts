@@ -33,6 +33,7 @@ function statusText(status: number): string {
     401: 'Unauthorized — não autenticado',
     403: 'Forbidden — credenciais inválidas ou sem permissão',
     404: 'Not Found — endpoint não existe',
+    405: 'Method Not Allowed — método HTTP não permitido nesta rota',
     422: 'Unprocessable Entity — dados inválidos',
     500: 'Internal Server Error',
     502: 'Bad Gateway',
@@ -47,6 +48,7 @@ function friendlyMessage(status: number): string {
     case 401: return 'Sessão expirada. Faça login novamente.';
     case 403: return 'E-mail ou senha incorretos.';
     case 404: return 'Recurso não encontrado.';
+    case 405: return 'Método HTTP não suportado nesta rota. Verifique a URL do backend nas variáveis de ambiente.';
     case 422: return 'Dados inválidos. Verifique o formulário.';
     case 500: return 'Erro interno no servidor. Tente novamente em alguns instantes.';
     default:  return 'Erro inesperado. Tente novamente.';
