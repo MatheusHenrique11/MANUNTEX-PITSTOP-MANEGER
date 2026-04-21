@@ -9,6 +9,7 @@ import java.util.UUID;
 
 public record ManutencaoResponse(
     UUID id,
+    UUID trackingToken,
     UUID veiculoId,
     String veiculoPlaca,
     String veiculoMarca,
@@ -35,6 +36,7 @@ public record ManutencaoResponse(
         var cliente = m.getVeiculo().getCliente();
         return new ManutencaoResponse(
             m.getId(),
+            m.getTrackingToken(),
             m.getVeiculo().getId(),
             m.getVeiculo().getPlaca(),
             m.getVeiculo().getMarca(),

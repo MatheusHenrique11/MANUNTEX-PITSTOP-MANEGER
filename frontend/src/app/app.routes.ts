@@ -10,6 +10,13 @@ export const routes: Routes = [
       import('./features/auth/login/login.component').then(m => m.LoginComponent),
   },
 
+  // ── Rastreio público (sem autenticação) ───────────────────
+  {
+    path: 'rastreio/:token',
+    loadComponent: () =>
+      import('./features/rastreio/rastreio.component').then(m => m.RastreioComponent),
+  },
+
   {
     path: '',
     loadComponent: () =>

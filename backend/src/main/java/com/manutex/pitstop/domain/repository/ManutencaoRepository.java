@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -15,4 +16,5 @@ public interface ManutencaoRepository extends JpaRepository<Manutencao, UUID> {
     Page<Manutencao> findByMecanicoId(UUID mecanicoId, Pageable pageable);
     Page<Manutencao> findByStatus(StatusManutencao status, Pageable pageable);
     Page<Manutencao> findByVeiculoIdAndStatus(UUID veiculoId, StatusManutencao status, Pageable pageable);
+    Optional<Manutencao> findByTrackingToken(UUID trackingToken);
 }

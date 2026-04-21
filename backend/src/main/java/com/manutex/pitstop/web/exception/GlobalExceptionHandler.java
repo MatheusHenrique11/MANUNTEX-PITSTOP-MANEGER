@@ -17,6 +17,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.net.URI;
 import java.time.Instant;
@@ -41,6 +42,15 @@ public class GlobalExceptionHandler {
         problem.setProperty("fields", errors);
         problem.setProperty("timestamp", Instant.now());
         return ResponseEntity.unprocessableEntity().body(problem);
+    }
+
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ProblemDetail> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        problem.setTitle("Parâmetro inválido");
+        problem.setDetail("O formato do parâmetro '" + ex.getName() + "' é inválido.");
+        problem.setProperty("timestamp", Instant.now());
+        return ResponseEntity.badRequest().body(problem);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)

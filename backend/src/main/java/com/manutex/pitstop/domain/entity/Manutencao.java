@@ -81,9 +81,15 @@ public class Manutencao extends BaseAuditEntity {
     @Column(columnDefinition = "TEXT")
     private String observacoes;
 
+    @Column(name = "tracking_token", nullable = false, unique = true, updatable = false)
+    private UUID trackingToken;
+
     @PreUpdate
     @PrePersist
     private void validateConclusao() {
+        if (trackingToken == null) {
+            trackingToken = UUID.randomUUID();
+        }
         if (status == StatusManutencao.CONCLUIDA && dataConclusao == null) {
             dataConclusao = Instant.now();
         }

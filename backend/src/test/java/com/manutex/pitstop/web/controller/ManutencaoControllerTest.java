@@ -65,7 +65,7 @@ class ManutencaoControllerTest {
     private ManutencaoResponse osResponse() {
         UUID id = UUID.randomUUID();
         return new ManutencaoResponse(
-            id, UUID.randomUUID(), "ABC1234", "VW", "Gol", "Prata",
+            id, UUID.randomUUID(), UUID.randomUUID(), "ABC1234", "VW", "Gol", "Prata",
             "João Silva", "(11) 99999-0000",
             UUID.randomUUID(), "Carlos Mecânico",
             "Revisão completa do motor e sistema de freios.",
@@ -137,7 +137,7 @@ class ManutencaoControllerTest {
     void deveAlterarStatus() throws Exception {
         UUID id = UUID.randomUUID();
         ManutencaoResponse concluida = new ManutencaoResponse(
-            id, UUID.randomUUID(), "XYZ9999", "Fiat", "Uno", null,
+            id, UUID.randomUUID(), UUID.randomUUID(), "XYZ9999", "Fiat", "Uno", null,
             "Maria", null, UUID.randomUUID(), "Carlos",
             "Revisão completa feita.", 50000, 50500,
             "Motor revisado com sucesso.", null,

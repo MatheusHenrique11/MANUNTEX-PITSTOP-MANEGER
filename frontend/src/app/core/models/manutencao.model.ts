@@ -7,6 +7,7 @@ export type StatusManutencao =
 
 export interface ManutencaoResponse {
   id: string;
+  trackingToken: string;
   veiculoId: string;
   veiculoPlaca: string;
   veiculoMarca: string;
