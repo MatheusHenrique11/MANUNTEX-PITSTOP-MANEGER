@@ -141,7 +141,7 @@ export class ShellComponent {
   readonly visibleNavItems = computed(() =>
     this.NAV_ITEMS.filter(item => {
       if (item.adminOnly && !this.auth.isAdmin()) return false;
-      if (item.feature) return this.featureFlags.isActive(item.feature as any);
+      if (item.feature && !this.auth.isAdmin()) return this.featureFlags.isActive(item.feature as any);
       return true;
     })
   );

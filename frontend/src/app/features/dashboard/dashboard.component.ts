@@ -1,8 +1,11 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, inject, signal, OnInit, computed, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { RouterLink, ActivatedRoute, Router } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '@core/services/auth.service';
 import { VeiculoService } from '@core/services/veiculo.service';
+import { FeatureFlagService } from '@core/services/feature-flag.service';
+import { FeatureName } from '@core/models/feature-flag.model';
 
 interface StatCard {
   label: string;
@@ -13,12 +16,48 @@ interface StatCard {
   icon: string;
 }
 
+interface QuickAction {
+  label: string;
+  sub: string;
+  path: string;
+  icon: string;
+  feature?: FeatureName;
+}
+
+const MODULE_LABELS: Partial<Record<FeatureName, string>> = {
+  VEHICLE_MANAGEMENT: 'Gestão de Veículos',
+  DOCUMENT_VAULT: 'Cofre de Documentos',
+  MAINTENANCE_MODULE: 'Manutenções',
+  ANALYTICS_DASHBOARD: 'Relatórios',
+  FINANCIAL_MODULE: 'Financeiro',
+};
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule, RouterLink],
   template: `
     <div class="page-wrapper">
+
+      <!-- Alerta de módulo desativado -->
+      @if (disabledModuleAlert()) {
+        <div class="mb-4 flex items-start gap-3 rounded-lg border border-safety-600/40
+                    bg-safety-600/10 px-4 py-3 text-sm text-safety-300">
+          <svg viewBox="0 0 24 24" class="w-4 h-4 mt-0.5 flex-shrink-0 fill-current text-safety-400">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+          </svg>
+          <span>
+            O módulo <strong>{{ disabledModuleAlert() }}</strong> está desativado neste tenant.
+            Entre em contato com o administrador para habilitá-lo.
+          </span>
+          <button (click)="disabledModuleAlert.set(null)"
+                  class="ml-auto flex-shrink-0 text-safety-400 hover:text-white transition-colors">
+            <svg viewBox="0 0 24 24" class="w-4 h-4 fill-current">
+              <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+            </svg>
+          </button>
+        </div>
+      }
 
       <!-- Header -->
       <div class="page-header">
@@ -61,7 +100,7 @@ interface StatCard {
       <div class="mb-8">
         <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">Ações Rápidas</h2>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-          @for (action of quickActions; track action.label) {
+          @for (action of visibleQuickActions(); track action.label) {
             <a [routerLink]="action.path"
                class="card-hover flex flex-col items-center gap-3 py-6 text-center group">
               <div class="w-12 h-12 rounded-xl flex items-center justify-center text-2xl
@@ -122,9 +161,14 @@ interface StatCard {
 export class DashboardComponent implements OnInit {
   private auth = inject(AuthService);
   private veiculoService = inject(VeiculoService);
+  private featureFlags = inject(FeatureFlagService);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
 
   readonly loadingStats = signal(true);
   readonly totalVeiculos = signal(0);
+  readonly disabledModuleAlert = signal<string | null>(null);
 
   readonly today = new Date().toLocaleDateString('pt-BR', {
     weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
@@ -177,29 +221,50 @@ export class DashboardComponent implements OnInit {
     },
   ]);
 
-  readonly quickActions = [
-    { label: 'Nova OS',       sub: 'Abrir ordem de serviço', path: '/manutencoes', icon: '🔩' },
-    { label: 'Novo Veículo',  sub: 'Cadastrar veículo',      path: '/veiculos/novo', icon: '🚗' },
-    { label: 'Upload Doc.',   sub: 'Enviar documento',        path: '/documentos/upload', icon: '📤' },
-    { label: 'Relatórios',   sub: 'Ver análises',            path: '/relatorios', icon: '📊' },
+  private readonly ALL_QUICK_ACTIONS: QuickAction[] = [
+    { label: 'Nova OS',      sub: 'Abrir ordem de serviço', path: '/manutencoes',       icon: '🔩', feature: 'MAINTENANCE_MODULE' },
+    { label: 'Novo Veículo', sub: 'Cadastrar veículo',      path: '/veiculos/novo',     icon: '🚗', feature: 'VEHICLE_MANAGEMENT' },
+    { label: 'Upload Doc.',  sub: 'Enviar documento',        path: '/documentos/upload', icon: '📤', feature: 'DOCUMENT_VAULT' },
+    { label: 'Relatórios',  sub: 'Ver análises',            path: '/relatorios',        icon: '📊', feature: 'ANALYTICS_DASHBOARD' },
   ];
 
+  readonly visibleQuickActions = computed<QuickAction[]>(() => {
+    if (this.auth.isAdmin()) return this.ALL_QUICK_ACTIONS;
+    return this.ALL_QUICK_ACTIONS.filter(
+      a => !a.feature || this.featureFlags.isActive(a.feature)
+    );
+  });
+
   readonly statusLegend = [
-    { label: 'Aguardando',  dot: 'bg-slate-400',   badge: 'badge-inactive' },
-    { label: 'Em andamento', dot: 'bg-safety-500', badge: 'badge-warning' },
-    { label: 'Concluída',   dot: 'bg-success-500', badge: 'badge-active' },
-    { label: 'Cancelada',   dot: 'bg-danger-500',  badge: 'badge-danger' },
+    { label: 'Aguardando',   dot: 'bg-slate-400',   badge: 'badge-inactive' },
+    { label: 'Em andamento', dot: 'bg-safety-500',  badge: 'badge-warning' },
+    { label: 'Concluída',    dot: 'bg-success-500', badge: 'badge-active' },
+    { label: 'Cancelada',    dot: 'bg-danger-500',  badge: 'badge-danger' },
   ];
 
   readonly systemInfo = [
-    { key: 'Versão',      value: 'v1.0.0' },
-    { key: 'Backend',     value: 'Spring Boot 3.3' },
-    { key: 'Banco',       value: 'PostgreSQL 16' },
-    { key: 'Segurança',   value: 'JWT + AES-256-GCM' },
+    { key: 'Versão',        value: 'v1.0.0' },
+    { key: 'Backend',       value: 'Spring Boot 3.3' },
+    { key: 'Banco',         value: 'PostgreSQL 16' },
+    { key: 'Segurança',     value: 'JWT + AES-256-GCM' },
     { key: 'Armazenamento', value: 'S3 / R2 Cloudflare' },
   ];
 
   ngOnInit() {
+    this.route.queryParams
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(params => {
+        const feature = params['modulo_desativado'] as FeatureName | undefined;
+        if (feature) {
+          this.disabledModuleAlert.set(MODULE_LABELS[feature] ?? feature);
+          this.router.navigate([], {
+            relativeTo: this.route,
+            queryParams: {},
+            replaceUrl: true,
+          });
+        }
+      });
+
     this.veiculoService.listar(0, 1).subscribe({
       next: p => {
         this.totalVeiculos.set(p.totalElements);
