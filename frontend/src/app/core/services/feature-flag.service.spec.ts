@@ -14,7 +14,7 @@ describe('FeatureFlagService', () => {
     ANALYTICS_DASHBOARD: { active: false, label: 'Dashboard' },
     NOTIFICATIONS:       { active: false, label: 'Notificações' },
     FINANCIAL_MODULE:    { active: false, label: 'Financeiro' },
-    DETRAN_INTEGRATION:  { active: false, label: 'DETRAN' },
+    DETRAN_INTEGRATION:  { active: false, label: 'Integração DETRAN' },
   };
 
   beforeEach(() => {
@@ -61,4 +61,38 @@ describe('FeatureFlagService', () => {
 
     expect(service.isActive('FEATURE_INEXISTENTE' as any)).toBeFalse();
   }));
+
+  describe('labelFor()', () => {
+    it('deve retornar o nome bruto quando flags não foram carregadas', () => {
+      expect(service.labelFor('VEHICLE_MANAGEMENT')).toBe('VEHICLE_MANAGEMENT');
+    });
+
+    it('deve retornar o label do backend após carregar', fakeAsync(() => {
+      service.load().subscribe();
+      httpMock.expectOne(req => req.url.includes('/features')).flush(mockFlags);
+      tick();
+
+      expect(service.labelFor('VEHICLE_MANAGEMENT')).toBe('Gestão de Veículos');
+      expect(service.labelFor('DOCUMENT_VAULT')).toBe('Cofre de Documentos');
+      expect(service.labelFor('MAINTENANCE_MODULE')).toBe('Manutenções');
+    }));
+
+    it('deve retornar o label para todos os módulos conhecidos', fakeAsync(() => {
+      service.load().subscribe();
+      httpMock.expectOne(req => req.url.includes('/features')).flush(mockFlags);
+      tick();
+
+      expect(service.labelFor('NOTIFICATIONS')).toBe('Notificações');
+      expect(service.labelFor('FINANCIAL_MODULE')).toBe('Financeiro');
+      expect(service.labelFor('DETRAN_INTEGRATION')).toBe('Integração DETRAN');
+    }));
+
+    it('deve retornar o nome bruto quando feature não existe no mapa', fakeAsync(() => {
+      service.load().subscribe();
+      httpMock.expectOne(req => req.url.includes('/features')).flush(mockFlags);
+      tick();
+
+      expect(service.labelFor('FEATURE_INEXISTENTE' as any)).toBe('FEATURE_INEXISTENTE');
+    }));
+  });
 });

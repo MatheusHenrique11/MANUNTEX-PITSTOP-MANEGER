@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router, ActivatedRouteSnapshot } from '@angular/router';
 import { FeatureFlagService } from '@core/services/feature-flag.service';
 import { AuthService } from '@core/services/auth.service';
-import { FeatureName } from '@core/models/feature-flag.model';
+import { FeatureName, DISABLED_MODULE_PARAM } from '@core/models/feature-flag.model';
 
 export const featureFlagGuard: CanActivateFn = (route: ActivatedRouteSnapshot) => {
   const featureFlags = inject(FeatureFlagService);
@@ -14,5 +14,5 @@ export const featureFlagGuard: CanActivateFn = (route: ActivatedRouteSnapshot) =
   if (auth.isAdmin()) return true;
   if (featureFlags.isActive(feature)) return true;
 
-  return router.createUrlTree(['/dashboard'], { queryParams: { modulo_desativado: feature } });
+  return router.createUrlTree(['/dashboard'], { queryParams: { [DISABLED_MODULE_PARAM]: feature } });
 };

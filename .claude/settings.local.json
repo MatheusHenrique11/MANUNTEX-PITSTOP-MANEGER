@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(CHROME_BIN=/home/matheuszani/.cache/ms-playwright/chromium_headless_shell-1217/chrome-headless-shell-linux64/chrome-headless-shell npx ng test --watch=false --browsers=ChromeHeadless)",
+      "Bash(./mvnw test *)",
+      "Bash(JAVA_HOME=/home/matheuszani/.jdks/ms-21.0.10 ./mvnw test -Dtest=\"SecurityConfigTest\" -q)",
+      "Bash(JAVA_HOME=/home/matheuszani/.jdks/ms-21.0.10 ./mvnw test -Dtest=\"SecurityConfigTest\")",
+      "Bash(JAVA_HOME=/home/matheuszani/.jdks/ms-21.0.10 ./mvnw test)"
+    ]
+  }
+}

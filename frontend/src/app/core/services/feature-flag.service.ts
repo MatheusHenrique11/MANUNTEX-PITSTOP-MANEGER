@@ -4,10 +4,6 @@ import { tap } from 'rxjs';
 import { environment } from '@env/environment';
 import { FeatureName, FeatureFlagsMap } from '@core/models/feature-flag.model';
 
-/**
- * Carrega e mantém o estado das Feature Flags do backend.
- * Usa Signals para que componentes e guards reativos detectem mudanças imediatamente.
- */
 @Injectable({ providedIn: 'root' })
 export class FeatureFlagService {
   private readonly apiUrl = `${environment.apiUrl}/features`;
@@ -30,5 +26,9 @@ export class FeatureFlagService {
 
   isActiveSignal(feature: FeatureName) {
     return computed(() => this._flags()?.[feature]?.active ?? false);
+  }
+
+  labelFor(feature: FeatureName): string {
+    return this._flags()?.[feature]?.label ?? feature;
   }
 }

@@ -11,7 +11,6 @@ describe('AuthService', () => {
   const mockResponse: AuthResponse = {
     expiresIn: 900,
     role: 'ROLE_ADMIN',
-    accessToken: null as any,
   };
 
   beforeEach(() => {
@@ -51,7 +50,7 @@ describe('AuthService', () => {
   }));
 
   it('deve retornar isPrivileged true para ROLE_GERENTE', fakeAsync(() => {
-    const gerenteResp: AuthResponse = { expiresIn: 900, role: 'ROLE_GERENTE', accessToken: null as any };
+    const gerenteResp: AuthResponse = { expiresIn: 900, role: 'ROLE_GERENTE' };
     service.login({ email: 'gerente@test.com', password: 'senha1234' }).subscribe();
 
     const req = httpMock.expectOne(req => req.url.includes('/auth/login'));

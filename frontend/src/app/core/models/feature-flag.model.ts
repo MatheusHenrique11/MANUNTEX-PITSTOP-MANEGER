@@ -13,3 +13,5 @@ export interface FeatureFlag {
 }
 
 export type FeatureFlagsMap = Record<FeatureName, FeatureFlag>;
+
+export const DISABLED_MODULE_PARAM = 'modulo_desativado' as const;

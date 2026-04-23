@@ -5,7 +5,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AuthService } from '@core/services/auth.service';
 import { VeiculoService } from '@core/services/veiculo.service';
 import { FeatureFlagService } from '@core/services/feature-flag.service';
-import { FeatureName } from '@core/models/feature-flag.model';
+import { FeatureName, DISABLED_MODULE_PARAM } from '@core/models/feature-flag.model';
 
 interface StatCard {
   label: string;
@@ -24,14 +24,6 @@ interface QuickAction {
   feature?: FeatureName;
 }
 
-const MODULE_LABELS: Partial<Record<FeatureName, string>> = {
-  VEHICLE_MANAGEMENT: 'Gestão de Veículos',
-  DOCUMENT_VAULT: 'Cofre de Documentos',
-  MAINTENANCE_MODULE: 'Manutenções',
-  ANALYTICS_DASHBOARD: 'Relatórios',
-  FINANCIAL_MODULE: 'Financeiro',
-};
-
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -39,10 +31,8 @@ const MODULE_LABELS: Partial<Record<FeatureName, string>> = {
   template: `
     <div class="page-wrapper">
 
-      <!-- Alerta de módulo desativado -->
       @if (disabledModuleAlert()) {
-        <div class="mb-4 flex items-start gap-3 rounded-lg border border-safety-600/40
-                    bg-safety-600/10 px-4 py-3 text-sm text-safety-300">
+        <div class="mb-4 alert-warning">
           <svg viewBox="0 0 24 24" class="w-4 h-4 mt-0.5 flex-shrink-0 fill-current text-safety-400">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
           </svg>
@@ -50,7 +40,7 @@ const MODULE_LABELS: Partial<Record<FeatureName, string>> = {
             O módulo <strong>{{ disabledModuleAlert() }}</strong> está desativado neste tenant.
             Entre em contato com o administrador para habilitá-lo.
           </span>
-          <button (click)="disabledModuleAlert.set(null)"
+          <button (click)="dismissModuleAlert()"
                   class="ml-auto flex-shrink-0 text-safety-400 hover:text-white transition-colors">
             <svg viewBox="0 0 24 24" class="w-4 h-4 fill-current">
               <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
@@ -59,7 +49,6 @@ const MODULE_LABELS: Partial<Record<FeatureName, string>> = {
         </div>
       }
 
-      <!-- Header -->
       <div class="page-header">
         <div>
           <h1 class="page-title">Dashboard</h1>
@@ -74,7 +63,6 @@ const MODULE_LABELS: Partial<Record<FeatureName, string>> = {
         </div>
       </div>
 
-      <!-- Stat cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
         @for (card of stats(); track card.label) {
           <div class="stat-card">
@@ -96,7 +84,6 @@ const MODULE_LABELS: Partial<Record<FeatureName, string>> = {
         }
       </div>
 
-      <!-- Quick actions -->
       <div class="mb-8">
         <h2 class="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-4">Ações Rápidas</h2>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -116,10 +103,8 @@ const MODULE_LABELS: Partial<Record<FeatureName, string>> = {
         </div>
       </div>
 
-      <!-- Status legend + info -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-        <!-- Status OS -->
         <div class="card">
           <h3 class="text-sm font-semibold text-slate-300 mb-4 flex items-center gap-2">
             <span class="w-2 h-2 bg-safety-500 rounded-full"></span>
@@ -138,7 +123,6 @@ const MODULE_LABELS: Partial<Record<FeatureName, string>> = {
           </div>
         </div>
 
-        <!-- System info -->
         <div class="card">
           <h3 class="text-sm font-semibold text-slate-300 mb-4 flex items-center gap-2">
             <span class="w-2 h-2 bg-petroleum-500 rounded-full"></span>
@@ -168,7 +152,9 @@ export class DashboardComponent implements OnInit {
 
   readonly loadingStats = signal(true);
   readonly totalVeiculos = signal(0);
-  readonly disabledModuleAlert = signal<string | null>(null);
+
+  private readonly _disabledModuleAlert = signal<string | null>(null);
+  readonly disabledModuleAlert = this._disabledModuleAlert.asReadonly();
 
   readonly today = new Date().toLocaleDateString('pt-BR', {
     weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
@@ -250,21 +236,28 @@ export class DashboardComponent implements OnInit {
     { key: 'Armazenamento', value: 'S3 / R2 Cloudflare' },
   ];
 
-  ngOnInit() {
+  constructor() {
     this.route.queryParams
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(params => {
-        const feature = params['modulo_desativado'] as FeatureName | undefined;
+        const feature = params[DISABLED_MODULE_PARAM] as FeatureName | undefined;
         if (feature) {
-          this.disabledModuleAlert.set(MODULE_LABELS[feature] ?? feature);
+          this._disabledModuleAlert.set(this.featureFlags.labelFor(feature));
           this.router.navigate([], {
             relativeTo: this.route,
-            queryParams: {},
+            queryParams: { [DISABLED_MODULE_PARAM]: null },
+            queryParamsHandling: 'merge',
             replaceUrl: true,
           });
         }
       });
+  }
 
+  dismissModuleAlert(): void {
+    this._disabledModuleAlert.set(null);
+  }
+
+  ngOnInit() {
     this.veiculoService.listar(0, 1).subscribe({
       next: p => {
         this.totalVeiculos.set(p.totalElements);

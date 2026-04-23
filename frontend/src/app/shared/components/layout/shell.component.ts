@@ -3,12 +3,14 @@ import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/rou
 import { CommonModule } from '@angular/common';
 import { AuthService } from '@core/services/auth.service';
 import { FeatureFlagService } from '@core/services/feature-flag.service';
+import { FeatureName } from '@core/models/feature-flag.model';
+import { UserRole, ROLE_LABELS } from '@core/models/user.model';
 
 interface NavItem {
   label: string;
   path: string;
   icon: string;
-  feature?: string;
+  feature?: FeatureName;
   adminOnly?: boolean;
 }
 
@@ -141,20 +143,14 @@ export class ShellComponent {
   readonly visibleNavItems = computed(() =>
     this.NAV_ITEMS.filter(item => {
       if (item.adminOnly && !this.auth.isAdmin()) return false;
-      if (item.feature && !this.auth.isAdmin()) return this.featureFlags.isActive(item.feature as any);
+      if (item.feature && !this.auth.isAdmin()) return this.featureFlags.isActive(item.feature);
       return true;
     })
   );
 
-  readonly roleLabel = computed(() => {
-    const map: Record<string, string> = {
-      ROLE_ADMIN: 'Administrador',
-      ROLE_GERENTE: 'Gerente',
-      ROLE_MECANICO: 'Mecânico',
-      ROLE_RECEPCIONISTA: 'Recepcionista',
-    };
-    return map[this.auth.role() ?? ''] ?? 'Usuário';
-  });
+  readonly roleLabel = computed(() =>
+    ROLE_LABELS[this.auth.role() as UserRole] ?? 'Usuário'
+  );
 
   readonly userEmail = computed(() => this.auth.email?.() ?? '');
   readonly userInitial = computed(() => (this.auth.email?.() ?? 'U')[0].toUpperCase());
