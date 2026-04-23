@@ -2,6 +2,7 @@ package com.manutex.pitstop.service;
 
 import com.manutex.pitstop.domain.entity.User;
 import com.manutex.pitstop.domain.enums.UserRole;
+import com.manutex.pitstop.domain.repository.EmpresaRepository;
 import com.manutex.pitstop.domain.repository.UserRepository;
 import com.manutex.pitstop.web.dto.UserRequest;
 import com.manutex.pitstop.web.dto.UserResponse;
@@ -13,7 +14,8 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
@@ -28,12 +30,14 @@ import static org.mockito.Mockito.*;
 class UserAdminServiceTest {
 
     @Mock UserRepository userRepository;
+    @Mock EmpresaRepository empresaRepository;
     @Mock PasswordEncoder passwordEncoder;
 
     @InjectMocks UserAdminService service;
 
     private User adminUser;
     private UUID adminId;
+    private Authentication adminAuth;
 
     @BeforeEach
     void setUp() {
@@ -45,6 +49,10 @@ class UserAdminServiceTest {
                 .role(UserRole.ROLE_ADMIN)
                 .enabled(true)
                 .build();
+
+        adminAuth = mock(Authentication.class);
+        lenient().when(adminAuth.getAuthorities()).thenAnswer(inv ->
+            List.of(new SimpleGrantedAuthority("ROLE_ADMIN")));
     }
 
     @Test
@@ -55,7 +63,7 @@ class UserAdminServiceTest {
         when(passwordEncoder.encode("Senha@1234")).thenReturn("$2a$hash_encoded");
         when(userRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        UserResponse resp = service.criar(req);
+        UserResponse resp = service.criar(req, adminAuth);
 
         assertThat(resp.email()).isEqualTo("novo@pitstop.com");
         assertThat(resp.fullName()).isEqualTo("Novo Usuário");
@@ -72,7 +80,7 @@ class UserAdminServiceTest {
         UserRequest req = new UserRequest("admin@pitstop.com", "Senha@1234", "Outro", UserRole.ROLE_GERENTE);
         when(userRepository.existsByEmail("admin@pitstop.com")).thenReturn(true);
 
-        assertThatThrownBy(() -> service.criar(req))
+        assertThatThrownBy(() -> service.criar(req, adminAuth))
                 .isInstanceOf(UserAdminService.EmailJaCadastradoException.class)
                 .hasMessageContaining("admin@pitstop.com");
 
@@ -80,14 +88,14 @@ class UserAdminServiceTest {
     }
 
     @Test
-    void deveListarTodosOsUsuarios() {
+    void deveListarTodosOsUsuariosParaAdmin() {
         User mecanico = User.builder()
                 .email("mec@pitstop.com").passwordHash("hash")
                 .fullName("Mecânico").role(UserRole.ROLE_MECANICO).enabled(true).build();
 
         when(userRepository.findAll()).thenReturn(List.of(adminUser, mecanico));
 
-        List<UserResponse> lista = service.listarTodos();
+        List<UserResponse> lista = service.listar(adminAuth);
 
         assertThat(lista).hasSize(2);
         assertThat(lista).extracting(UserResponse::email)

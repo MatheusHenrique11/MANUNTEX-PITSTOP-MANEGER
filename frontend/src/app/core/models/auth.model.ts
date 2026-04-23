@@ -7,6 +7,7 @@ export interface AuthResponse {
   expiresIn: number;
   role: string;
   email?: string;
+  empresaId?: string;
 }
 
 export type UserRole =

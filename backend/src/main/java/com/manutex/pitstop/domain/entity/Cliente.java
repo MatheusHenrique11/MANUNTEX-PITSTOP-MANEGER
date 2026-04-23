@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnTransformer;
+import com.manutex.pitstop.domain.entity.Empresa;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,7 +38,7 @@ public class Cliente extends BaseAuditEntity {
         regexp = "^(\\d{3}\\.\\d{3}\\.\\d{3}-\\d{2}|\\d{2}\\.\\d{3}\\.\\d{3}/\\d{4}-\\d{2}|\\d{11}|\\d{14})$",
         message = "CPF ou CNPJ inválido"
     )
-    @Column(name = "cpf_cnpj", nullable = false, unique = true, length = 18)
+    @Column(name = "cpf_cnpj", nullable = false, length = 18)
     private String cpfCnpj;
 
     @Size(max = 20)
@@ -49,6 +50,10 @@ public class Cliente extends BaseAuditEntity {
     @Size(max = 180)
     @Column(length = 180)
     private String email;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "empresa_id")
+    private Empresa empresa;
 
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default

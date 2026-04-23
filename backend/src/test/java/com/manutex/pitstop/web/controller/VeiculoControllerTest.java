@@ -6,8 +6,10 @@ import com.manutex.pitstop.config.TestSecurityConfig;
 import com.manutex.pitstop.domain.entity.Cliente;
 import com.manutex.pitstop.domain.entity.Veiculo;
 import com.manutex.pitstop.domain.repository.ClienteRepository;
+import com.manutex.pitstop.domain.repository.EmpresaRepository;
 import com.manutex.pitstop.domain.repository.VeiculoRepository;
 import com.manutex.pitstop.security.JwtAuthenticationFilter;
+import com.manutex.pitstop.security.TenantContext;
 import com.manutex.pitstop.web.dto.VeiculoRequest;
 import com.manutex.pitstop.web.filter.RateLimitFilter;
 import jakarta.servlet.FilterChain;
@@ -58,9 +60,11 @@ class VeiculoControllerTest {
 
     @MockBean VeiculoRepository veiculoRepository;
     @MockBean ClienteRepository clienteRepository;
+    @MockBean EmpresaRepository empresaRepository;
     @MockBean JwtAuthenticationFilter jwtAuthenticationFilter;
     @MockBean RateLimitFilter rateLimitFilter;
 
+    private static final UUID EMPRESA_ID = UUID.randomUUID();
     private FeatureManager featureManager;
 
     @BeforeEach
@@ -92,16 +96,17 @@ class VeiculoControllerTest {
     @WithMockUser(roles = "MECANICO")
     void deveListarVeiculosComMasking() throws Exception {
         Veiculo v = veiculoMock();
-        when(veiculoRepository.findAll(any(Pageable.class)))
+        when(veiculoRepository.findByClienteEmpresaId(eq(EMPRESA_ID), any(Pageable.class)))
             .thenReturn(new PageImpl<>(List.of(v)));
 
-        try (MockedStatic<FeatureContext> ctxMock = Mockito.mockStatic(FeatureContext.class)) {
+        try (MockedStatic<FeatureContext> ctxMock = Mockito.mockStatic(FeatureContext.class);
+             MockedStatic<TenantContext> tenantMock = Mockito.mockStatic(TenantContext.class)) {
             ctxMock.when(FeatureContext::getFeatureManager).thenReturn(featureManager);
+            tenantMock.when(TenantContext::requireEmpresaId).thenReturn(EMPRESA_ID);
 
             mockMvc.perform(get("/api/v1/veiculos"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content[0].placa").value("ABC1234"))
-                // Chassi deve estar mascarado para MECANICO
                 .andExpect(jsonPath("$.content[0].chassi").value(org.hamcrest.Matchers.startsWith("*")));
         }
     }

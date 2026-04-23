@@ -2,6 +2,7 @@ package com.manutex.pitstop.domain.entity;
 
 import com.manutex.pitstop.domain.enums.UserRole;
 import jakarta.persistence.*;
+import com.manutex.pitstop.domain.entity.Empresa;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -52,6 +53,10 @@ public class User extends BaseAuditEntity implements UserDetails {
     @Column(nullable = false)
     @Builder.Default
     private boolean enabled = true;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "empresa_id")
+    private Empresa empresa;
 
     // ── UserDetails ──────────────────────────────────────────────
     @Override

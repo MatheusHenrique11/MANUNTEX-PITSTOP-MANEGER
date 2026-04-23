@@ -24,7 +24,12 @@ public interface VeiculoRepository extends JpaRepository<Veiculo, UUID> {
 
     Page<Veiculo> findByClienteId(UUID clienteId, Pageable pageable);
 
-    // Busca por placa (sem dados sensíveis no JPQL — chassi/RENAVAM não são retornados por default)
     @Query("SELECT v FROM Veiculo v WHERE v.placa LIKE UPPER(CONCAT('%', :termo, '%')) OR LOWER(v.modelo) LIKE LOWER(CONCAT('%', :termo, '%'))")
     Page<Veiculo> search(@Param("termo") String termo, Pageable pageable);
+
+    @Query("SELECT v FROM Veiculo v WHERE v.cliente.empresa.id = :empresaId AND " +
+           "(v.placa LIKE UPPER(CONCAT('%', :termo, '%')) OR LOWER(v.modelo) LIKE LOWER(CONCAT('%', :termo, '%')))")
+    Page<Veiculo> searchByEmpresa(@Param("empresaId") UUID empresaId, @Param("termo") String termo, Pageable pageable);
+
+    Page<Veiculo> findByClienteEmpresaId(UUID empresaId, Pageable pageable);
 }

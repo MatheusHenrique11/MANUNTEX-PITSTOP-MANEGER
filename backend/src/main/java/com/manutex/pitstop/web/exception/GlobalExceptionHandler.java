@@ -2,8 +2,10 @@ package com.manutex.pitstop.web.exception;
 
 import com.manutex.pitstop.service.AesEncryptionService;
 import com.manutex.pitstop.service.AuthService;
+import com.manutex.pitstop.service.ClienteService;
 import com.manutex.pitstop.service.DocumentoService;
 import com.manutex.pitstop.service.EmpresaConfigService;
+import com.manutex.pitstop.service.EmpresaService;
 import com.manutex.pitstop.service.ManutencaoService;
 import com.manutex.pitstop.service.UserAdminService;
 import com.manutex.pitstop.service.PdfMagicNumberValidator;
@@ -134,6 +136,33 @@ public class GlobalExceptionHandler {
         problem.setDetail(ex.getMessage());
         problem.setProperty("timestamp", Instant.now());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
+    }
+
+    @ExceptionHandler(EmpresaService.CnpjJaCadastradoException.class)
+    public ResponseEntity<ProblemDetail> handleCnpjDuplicado(EmpresaService.CnpjJaCadastradoException ex) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        problem.setTitle("CNPJ já cadastrado");
+        problem.setDetail(ex.getMessage());
+        problem.setProperty("timestamp", Instant.now());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
+    }
+
+    @ExceptionHandler(ClienteService.CpfCnpjJaCadastradoException.class)
+    public ResponseEntity<ProblemDetail> handleCpfCnpjDuplicado(ClienteService.CpfCnpjJaCadastradoException ex) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.CONFLICT);
+        problem.setTitle("CPF/CNPJ já cadastrado");
+        problem.setDetail(ex.getMessage());
+        problem.setProperty("timestamp", Instant.now());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(problem);
+    }
+
+    @ExceptionHandler(UserAdminService.RoleNaoPermitidaException.class)
+    public ResponseEntity<ProblemDetail> handleRoleNaoPermitida(UserAdminService.RoleNaoPermitidaException ex) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
+        problem.setTitle("Role não permitida");
+        problem.setDetail(ex.getMessage());
+        problem.setProperty("timestamp", Instant.now());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problem);
     }
 
     @ExceptionHandler(Exception.class)

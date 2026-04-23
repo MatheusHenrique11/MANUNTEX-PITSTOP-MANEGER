@@ -23,6 +23,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.time.Instant;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -60,19 +61,20 @@ public class AuthService {
 
         String accessToken = jwtService.generateAccessToken(
             user.getEmail(),
-            Map.of("roles", user.getAuthorities().stream()
-                .map(a -> a.getAuthority()).toList())
+            buildClaims(user)
         );
 
         // Refresh token: gerado aleatoriamente, armazenado apenas como hash
         String rawRefreshToken = generateSecureToken();
         persistRefreshToken(user, rawRefreshToken);
 
+        UUID empresaId = user.getEmpresa() != null ? user.getEmpresa().getId() : null;
         return new AuthResponse(
             accessToken,
             accessTokenExpiryMs / 1000,
             user.getRole().name(),
-            user.getEmail()
+            user.getEmail(),
+            empresaId
         );
     }
 
@@ -113,11 +115,11 @@ public class AuthService {
 
         String accessToken = jwtService.generateAccessToken(
             user.getEmail(),
-            Map.of("roles", user.getAuthorities().stream()
-                .map(a -> a.getAuthority()).toList())
+            buildClaims(user)
         );
 
-        return new AuthResponse(accessToken, accessTokenExpiryMs / 1000, user.getRole().name(), user.getEmail());
+        UUID empresaId = user.getEmpresa() != null ? user.getEmpresa().getId() : null;
+        return new AuthResponse(accessToken, accessTokenExpiryMs / 1000, user.getRole().name(), user.getEmail(), empresaId);
     }
 
     @Transactional
@@ -155,6 +157,15 @@ public class AuthService {
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("SHA-256 não disponível", e);
         }
+    }
+
+    private Map<String, Object> buildClaims(User user) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("roles", user.getAuthorities().stream().map(a -> a.getAuthority()).toList());
+        if (user.getEmpresa() != null) {
+            claims.put("empresaId", user.getEmpresa().getId().toString());
+        }
+        return claims;
     }
 
     public static class InvalidCredentialsException extends RuntimeException {

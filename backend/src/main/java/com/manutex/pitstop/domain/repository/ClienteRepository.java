@@ -14,9 +14,12 @@ import java.util.UUID;
 @Repository
 public interface ClienteRepository extends JpaRepository<Cliente, UUID> {
 
-    Optional<Cliente> findByCpfCnpj(String cpfCnpj);
-    boolean existsByCpfCnpj(String cpfCnpj);
+    Optional<Cliente> findByCpfCnpjAndEmpresaId(String cpfCnpj, UUID empresaId);
+    boolean existsByCpfCnpjAndEmpresaId(String cpfCnpj, UUID empresaId);
 
-    @Query("SELECT c FROM Cliente c WHERE LOWER(c.nome) LIKE LOWER(CONCAT('%', :nome, '%'))")
-    Page<Cliente> findByNomeContainingIgnoreCase(@Param("nome") String nome, Pageable pageable);
+    @Query("SELECT c FROM Cliente c WHERE c.empresa.id = :empresaId AND " +
+           "(LOWER(c.nome) LIKE LOWER(CONCAT('%', :q, '%')) OR c.cpfCnpj LIKE CONCAT('%', :q, '%'))")
+    Page<Cliente> searchByEmpresa(@Param("empresaId") UUID empresaId, @Param("q") String q, Pageable pageable);
+
+    Page<Cliente> findByEmpresaId(UUID empresaId, Pageable pageable);
 }

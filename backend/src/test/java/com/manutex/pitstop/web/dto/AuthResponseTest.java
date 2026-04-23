@@ -8,7 +8,7 @@ class AuthResponseTest {
 
     @Test
     void deveConstruirComTodosOsCampos() {
-        AuthResponse resp = new AuthResponse("token.jwt", 900L, "ROLE_ADMIN", "admin@pitstop.com");
+        AuthResponse resp = new AuthResponse("token.jwt", 900L, "ROLE_ADMIN", "admin@pitstop.com", null);
 
         assertThat(resp.accessToken()).isEqualTo("token.jwt");
         assertThat(resp.expiresIn()).isEqualTo(900L);
@@ -18,7 +18,7 @@ class AuthResponseTest {
 
     @Test
     void deveAceitarAccessTokenNuloNoBodyDaResposta() {
-        AuthResponse resp = new AuthResponse(null, 900L, "ROLE_MECANICO", "mecanico@pitstop.com");
+        AuthResponse resp = new AuthResponse(null, 900L, "ROLE_MECANICO", "mecanico@pitstop.com", null);
 
         assertThat(resp.accessToken()).isNull();
         assertThat(resp.role()).isEqualTo("ROLE_MECANICO");
@@ -27,7 +27,7 @@ class AuthResponseTest {
 
     @Test
     void deveAceitarEmailNuloParaTokenRefreshSemEmail() {
-        AuthResponse resp = new AuthResponse(null, 900L, "ROLE_ADMIN", null);
+        AuthResponse resp = new AuthResponse(null, 900L, "ROLE_ADMIN", null, null);
 
         assertThat(resp.email()).isNull();
         assertThat(resp.role()).isEqualTo("ROLE_ADMIN");
@@ -35,8 +35,8 @@ class AuthResponseTest {
 
     @Test
     void deveSerIgualComMesmosValores() {
-        AuthResponse r1 = new AuthResponse("tok", 300L, "ROLE_GERENTE", "g@pitstop.com");
-        AuthResponse r2 = new AuthResponse("tok", 300L, "ROLE_GERENTE", "g@pitstop.com");
+        AuthResponse r1 = new AuthResponse("tok", 300L, "ROLE_GERENTE", "g@pitstop.com", null);
+        AuthResponse r2 = new AuthResponse("tok", 300L, "ROLE_GERENTE", "g@pitstop.com", null);
 
         assertThat(r1).isEqualTo(r2);
         assertThat(r1.hashCode()).isEqualTo(r2.hashCode());
@@ -44,7 +44,7 @@ class AuthResponseTest {
 
     @Test
     void toStringDeveConterCamposPrincipais() {
-        AuthResponse resp = new AuthResponse(null, 900L, "ROLE_ADMIN", "a@b.com");
+        AuthResponse resp = new AuthResponse(null, 900L, "ROLE_ADMIN", "a@b.com", null);
         String str = resp.toString();
 
         assertThat(str).contains("ROLE_ADMIN");

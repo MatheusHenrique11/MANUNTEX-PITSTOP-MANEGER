@@ -55,7 +55,7 @@ class AuthControllerTest {
     @Test
     void deveRetornarAuthResponseNoLogin() throws Exception {
         AuthRequest req = new AuthRequest("admin@test.com", "senha1234");
-        AuthResponse resp = new AuthResponse("jwt.access.token", 900L, "ROLE_ADMIN", "admin@test.com");
+        AuthResponse resp = new AuthResponse("jwt.access.token", 900L, "ROLE_ADMIN", "admin@test.com", null);
 
         when(authService.login(any())).thenReturn(resp);
         when(authService.loginAndGetRefreshToken(any())).thenReturn("raw_refresh_token");

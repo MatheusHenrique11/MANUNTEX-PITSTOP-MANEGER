@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -17,19 +18,19 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/admin/users")
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('ROLE_ADMIN')")
+@PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_GERENTE')")
 public class UserAdminController {
 
     private final UserAdminService userAdminService;
 
     @GetMapping
-    public ResponseEntity<List<UserResponse>> listar() {
-        return ResponseEntity.ok(userAdminService.listarTodos());
+    public ResponseEntity<List<UserResponse>> listar(Authentication auth) {
+        return ResponseEntity.ok(userAdminService.listar(auth));
     }
 
     @PostMapping
-    public ResponseEntity<UserResponse> criar(@Valid @RequestBody UserRequest request) {
-        UserResponse created = userAdminService.criar(request);
+    public ResponseEntity<UserResponse> criar(@Valid @RequestBody UserRequest request, Authentication auth) {
+        UserResponse created = userAdminService.criar(request, auth);
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}").buildAndExpand(created.id()).toUri();
         return ResponseEntity.created(location).body(created);

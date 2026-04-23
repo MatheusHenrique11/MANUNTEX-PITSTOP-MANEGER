@@ -2,10 +2,13 @@ import { Component, inject, signal, OnInit, Input } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { Subject, debounceTime, distinctUntilChanged, switchMap } from 'rxjs';
 import { VeiculoService } from '@core/services/veiculo.service';
+import { ClienteService } from '@core/services/cliente.service';
+import { Cliente } from '@core/models/cliente.model';
 
-const PLACA_ANTIGA    = /^[A-Za-z]{3}[0-9]{4}$/;
-const PLACA_MERCOSUL  = /^[A-Za-z]{3}[0-9][A-Za-z][0-9]{2}$/;
+const PLACA_ANTIGA   = /^[A-Za-z]{3}[0-9]{4}$/;
+const PLACA_MERCOSUL = /^[A-Za-z]{3}[0-9][A-Za-z][0-9]{2}$/;
 
 function placaValidator(control: { value: string }) {
   if (!control.value) return null;
@@ -82,10 +85,36 @@ function placaValidator(control: { value: string }) {
           </div>
         </div>
 
-        <div>
-          <label class="form-label">ID do Cliente *</label>
-          <input formControlName="clienteId" class="form-input font-mono"
-                 placeholder="UUID do cliente">
+        <!-- Cliente autocomplete -->
+        <div class="relative">
+          <label class="form-label">Cliente *</label>
+          <input
+            #clienteInput
+            type="text"
+            class="form-input"
+            [class.border-red-400]="form.get('clienteId')?.invalid && form.get('clienteId')?.touched"
+            [value]="clienteNomeSelecionado()"
+            (input)="onClienteInput(clienteInput.value)"
+            (blur)="onClienteBlur()"
+            placeholder="Digite o nome ou CPF/CNPJ do cliente"
+            [disabled]="!!id"
+          >
+          @if (clienteSugestoes().length > 0) {
+            <ul class="absolute z-20 w-full bg-white border border-gray-200 rounded-lg shadow-lg mt-1 max-h-52 overflow-y-auto">
+              @for (c of clienteSugestoes(); track c.id) {
+                <li
+                  class="px-4 py-2 hover:bg-blue-50 cursor-pointer text-sm"
+                  (mousedown)="selecionarCliente(c)"
+                >
+                  <span class="font-medium">{{ c.nome }}</span>
+                  <span class="ml-2 text-gray-400 text-xs">{{ c.cpfCnpj }}</span>
+                </li>
+              }
+            </ul>
+          }
+          @if (form.get('clienteId')?.invalid && form.get('clienteId')?.touched) {
+            <p class="form-error">Selecione um cliente da lista</p>
+          }
         </div>
 
         @if (error()) {
@@ -113,9 +142,14 @@ export class VeiculoFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   readonly router = inject(Router);
   private veiculoService = inject(VeiculoService);
+  private clienteService = inject(ClienteService);
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
+  readonly clienteSugestoes = signal<Cliente[]>([]);
+  readonly clienteNomeSelecionado = signal('');
+
+  private readonly searchSubject = new Subject<string>();
 
   readonly form = this.fb.group({
     placa:         ['', [Validators.required, placaValidator]],
@@ -130,13 +164,37 @@ export class VeiculoFormComponent implements OnInit {
   });
 
   ngOnInit() {
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(q => q.length >= 2 ? this.clienteService.listar(q, 0, 10) : [])
+    ).subscribe(page => {
+      this.clienteSugestoes.set('content' in page ? (page as any).content : []);
+    });
+
     if (this.id) {
       this.veiculoService.buscarPorId(this.id).subscribe(v => {
         this.form.patchValue(v);
-        this.form.get('chassi')?.disable(); // chassi não pode ser editado após cadastro
+        this.form.get('chassi')?.disable();
         this.form.get('renavam')?.disable();
       });
     }
+  }
+
+  onClienteInput(value: string) {
+    this.clienteNomeSelecionado.set(value);
+    this.form.get('clienteId')?.setValue('');
+    this.searchSubject.next(value);
+  }
+
+  selecionarCliente(cliente: Cliente) {
+    this.form.get('clienteId')?.setValue(cliente.id);
+    this.clienteNomeSelecionado.set(cliente.nome);
+    this.clienteSugestoes.set([]);
+  }
+
+  onClienteBlur() {
+    setTimeout(() => this.clienteSugestoes.set([]), 150);
   }
 
   submit() {

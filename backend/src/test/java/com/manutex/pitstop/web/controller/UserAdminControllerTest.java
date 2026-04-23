@@ -70,7 +70,7 @@ class UserAdminControllerTest {
     @WithMockUser(roles = "ADMIN")
     void deveCriarUsuarioComSucesso() throws Exception {
         UserRequest req = new UserRequest("novo@pitstop.com", "Senha@1234", "Novo Usuário", UserRole.ROLE_MECANICO);
-        when(userAdminService.criar(any())).thenReturn(sampleResponse);
+        when(userAdminService.criar(any(), any())).thenReturn(sampleResponse);
 
         mockMvc.perform(post("/api/v1/admin/users")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -86,7 +86,7 @@ class UserAdminControllerTest {
     @WithMockUser(roles = "ADMIN")
     void deveRetornar409QuandoEmailJaExiste() throws Exception {
         UserRequest req = new UserRequest("dup@pitstop.com", "Senha@1234", "Dup", UserRole.ROLE_MECANICO);
-        when(userAdminService.criar(any()))
+        when(userAdminService.criar(any(), any()))
             .thenThrow(new UserAdminService.EmailJaCadastradoException("E-mail já cadastrado: dup@pitstop.com"));
 
         mockMvc.perform(post("/api/v1/admin/users")
@@ -134,7 +134,7 @@ class UserAdminControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void deveListarTodosOsUsuarios() throws Exception {
-        when(userAdminService.listarTodos()).thenReturn(List.of(sampleResponse));
+        when(userAdminService.listar(any())).thenReturn(List.of(sampleResponse));
 
         mockMvc.perform(get("/api/v1/admin/users"))
             .andExpect(status().isOk())
