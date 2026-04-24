@@ -15,6 +15,7 @@ describe('FeatureFlagService', () => {
     NOTIFICATIONS:       { active: false, label: 'Notificações' },
     FINANCIAL_MODULE:    { active: false, label: 'Financeiro' },
     DETRAN_INTEGRATION:  { active: false, label: 'Integração DETRAN' },
+    GOALS_MODULE:        { active: false, label: 'Metas por Mecânico' },
   };
 
   beforeEach(() => {

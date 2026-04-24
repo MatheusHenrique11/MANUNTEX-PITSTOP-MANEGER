@@ -103,6 +103,40 @@ export const routes: Routes = [
             .then(m => m.FeatureFlagsComponent),
       },
 
+      // ── Módulo: Metas por Mecânico ────────────────────────────
+      {
+        path: 'metas',
+        canActivate: [featureFlagGuard],
+        data: { feature: 'GOALS_MODULE' },
+        children: [
+          {
+            path: 'mecanico',
+            canActivate: [roleGuard],
+            data: { roles: ['ROLE_MECANICO', 'ROLE_ADMIN', 'ROLE_GERENTE'] },
+            loadComponent: () =>
+              import('./features/metas/mecanico/minhas-metas.component')
+                .then(m => m.MinhasMetasComponent),
+          },
+          {
+            path: 'gerente',
+            canActivate: [roleGuard],
+            data: { roles: ['ROLE_GERENTE', 'ROLE_ADMIN'] },
+            loadComponent: () =>
+              import('./features/metas/gerente/metas-gerente.component')
+                .then(m => m.MetasGerenteComponent),
+          },
+          {
+            path: 'gerente/mecanico/:mecanicoId',
+            canActivate: [roleGuard],
+            data: { roles: ['ROLE_GERENTE', 'ROLE_ADMIN'] },
+            loadComponent: () =>
+              import('./features/metas/gerente/detalhe-mecanico.component')
+                .then(m => m.DetalheMecanicoComponent),
+          },
+          { path: '', redirectTo: 'gerente', pathMatch: 'full' },
+        ],
+      },
+
       // ── Erro 403 ──────────────────────────────────────────────
       {
         path: '403',

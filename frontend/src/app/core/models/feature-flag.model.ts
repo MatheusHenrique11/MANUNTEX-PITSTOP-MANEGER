@@ -5,7 +5,8 @@ export type FeatureName =
   | 'ANALYTICS_DASHBOARD'
   | 'NOTIFICATIONS'
   | 'FINANCIAL_MODULE'
-  | 'DETRAN_INTEGRATION';
+  | 'DETRAN_INTEGRATION'
+  | 'GOALS_MODULE';
 
 export interface FeatureFlag {
   active: boolean;

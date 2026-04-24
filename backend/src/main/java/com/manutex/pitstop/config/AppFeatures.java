@@ -33,7 +33,10 @@ public enum AppFeatures implements Feature {
     FINANCIAL_MODULE,
 
     @Label("Integração com DETRAN (validação online)")
-    DETRAN_INTEGRATION;
+    DETRAN_INTEGRATION,
+
+    @Label("Módulo de Metas por Mecânico")
+    GOALS_MODULE;
 
     public boolean isActive() {
         return FeatureContext.getFeatureManager().isActive(this);

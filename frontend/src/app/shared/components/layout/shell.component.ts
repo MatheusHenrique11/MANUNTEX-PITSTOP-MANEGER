@@ -12,6 +12,8 @@ interface NavItem {
   icon: string;
   feature?: FeatureName;
   adminOnly?: boolean;
+  /** Roles que podem ver este item. Vazio = todos autenticados. */
+  roles?: UserRole[];
 }
 
 @Component({
@@ -130,23 +132,40 @@ export class ShellComponent {
   readonly sidebarOpen = signal(false);
 
   private readonly NAV_ITEMS: NavItem[] = [
-    { label: 'Dashboard',   path: '/dashboard',    icon: '▦', feature: undefined },
-    { label: 'Veículos',    path: '/veiculos',     icon: '🚗', feature: 'VEHICLE_MANAGEMENT' },
-    { label: 'Manutenções', path: '/manutencoes',  icon: '🔩', feature: 'MAINTENANCE_MODULE' },
+    { label: 'Dashboard',   path: '/dashboard',         icon: '▦' },
+    { label: 'Veículos',    path: '/veiculos',          icon: '🚗', feature: 'VEHICLE_MANAGEMENT' },
+    { label: 'Manutenções', path: '/manutencoes',       icon: '🔩', feature: 'MAINTENANCE_MODULE' },
     { label: 'Documentos',  path: '/documentos/upload', icon: '📄', feature: 'DOCUMENT_VAULT' },
-    { label: 'Financeiro',  path: '/financeiro',   icon: '💰', feature: 'FINANCIAL_MODULE' },
-    { label: 'Relatórios',  path: '/relatorios',   icon: '📊', feature: 'ANALYTICS_DASHBOARD' },
-    { label: 'Usuários',    path: '/admin/usuarios', icon: '👥', adminOnly: true },
-    { label: 'Módulos',     path: '/admin/modulos', icon: '⚙', adminOnly: true },
+    // Metas — gerente/admin vê /metas/gerente; mecânico vê /metas/mecanico
+    {
+      label: 'Metas',
+      path: '/metas/gerente',
+      icon: '🎯',
+      feature: 'GOALS_MODULE',
+      roles: ['ROLE_GERENTE', 'ROLE_ADMIN'],
+    },
+    {
+      label: 'Minhas Metas',
+      path: '/metas/mecanico',
+      icon: '🎯',
+      feature: 'GOALS_MODULE',
+      roles: ['ROLE_MECANICO'],
+    },
+    { label: 'Financeiro',  path: '/financeiro',        icon: '💰', feature: 'FINANCIAL_MODULE' },
+    { label: 'Relatórios',  path: '/relatorios',        icon: '📊', feature: 'ANALYTICS_DASHBOARD' },
+    { label: 'Usuários',    path: '/admin/usuarios',    icon: '👥', adminOnly: true },
+    { label: 'Módulos',     path: '/admin/modulos',     icon: '⚙',  adminOnly: true },
   ];
 
-  readonly visibleNavItems = computed(() =>
-    this.NAV_ITEMS.filter(item => {
+  readonly visibleNavItems = computed(() => {
+    const role = this.auth.role() as UserRole | null;
+    return this.NAV_ITEMS.filter(item => {
       if (item.adminOnly && !this.auth.isAdmin()) return false;
+      if (item.roles && role && !item.roles.includes(role)) return false;
       if (item.feature && !this.auth.isAdmin()) return this.featureFlags.isActive(item.feature);
       return true;
-    })
-  );
+    });
+  });
 
   readonly roleLabel = computed(() =>
     ROLE_LABELS[this.auth.role() as UserRole] ?? 'Usuário'
