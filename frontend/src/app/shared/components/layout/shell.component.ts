@@ -85,6 +85,15 @@ interface NavItem {
               <p class="text-xs text-slate-500">{{ roleLabel() }}</p>
             </div>
           </div>
+          <a
+            routerLink="/privacidade"
+            class="w-full text-left text-xs text-slate-600 hover:text-petroleum-400
+                   flex items-center gap-2 px-3 py-1.5 rounded-lg transition-colors">
+            <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 fill-current flex-shrink-0">
+              <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+            </svg>
+            Privacidade (LGPD)
+          </a>
           <button
             (click)="logout()"
             class="w-full text-left text-sm text-slate-500 hover:text-danger-400
@@ -153,6 +162,7 @@ export class ShellComponent {
     },
     { label: 'Financeiro',  path: '/financeiro',        icon: '💰', feature: 'FINANCIAL_MODULE' },
     { label: 'Relatórios',  path: '/relatorios',        icon: '📊', feature: 'ANALYTICS_DASHBOARD' },
+    { label: 'Faturamento', path: '/billing/dashboard', icon: '🧾', roles: ['ROLE_ADMIN', 'ROLE_GERENTE'] },
     { label: 'Usuários',    path: '/admin/usuarios',    icon: '👥', adminOnly: true },
     { label: 'Módulos',     path: '/admin/modulos',     icon: '⚙',  adminOnly: true },
   ];

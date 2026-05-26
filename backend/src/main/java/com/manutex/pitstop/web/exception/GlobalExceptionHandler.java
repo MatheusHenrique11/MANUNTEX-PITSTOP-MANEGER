@@ -1,7 +1,10 @@
 package com.manutex.pitstop.web.exception;
 
 import com.manutex.pitstop.service.AesEncryptionService;
+import com.manutex.pitstop.service.CnpjLookupService;
+import com.manutex.pitstop.service.LgpdService;
 import com.manutex.pitstop.service.AuthService;
+import com.manutex.pitstop.service.BillingService;
 import com.manutex.pitstop.service.ClienteService;
 import com.manutex.pitstop.service.DocumentoService;
 import com.manutex.pitstop.service.EmpresaConfigService;
@@ -163,6 +166,44 @@ public class GlobalExceptionHandler {
         problem.setDetail(ex.getMessage());
         problem.setProperty("timestamp", Instant.now());
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problem);
+    }
+
+    @ExceptionHandler(LgpdService.ConsentRequiredException.class)
+    public ResponseEntity<ProblemDetail> handleConsentRequired(LgpdService.ConsentRequiredException ex) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
+        problem.setTitle("Consentimento obrigatório");
+        problem.setDetail(ex.getMessage());
+        problem.setType(URI.create("https://pitstop.manutex.com/errors/consent-required"));
+        problem.setProperty("timestamp", Instant.now());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problem);
+    }
+
+    @ExceptionHandler(CnpjLookupService.CnpjNotFoundException.class)
+    public ResponseEntity<ProblemDetail> handleCnpjNotFound(CnpjLookupService.CnpjNotFoundException ex) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
+        problem.setTitle("CNPJ não encontrado");
+        problem.setDetail(ex.getMessage());
+        problem.setProperty("timestamp", Instant.now());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
+    }
+
+    @ExceptionHandler(BillingService.SubscriptionRequiredException.class)
+    public ResponseEntity<ProblemDetail> handleSubscriptionRequired(BillingService.SubscriptionRequiredException ex) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.PAYMENT_REQUIRED);
+        problem.setTitle("Assinatura necessária");
+        problem.setDetail(ex.getMessage());
+        problem.setType(URI.create("https://pitstop.manutex.com/errors/subscription-required"));
+        problem.setProperty("timestamp", Instant.now());
+        return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(problem);
+    }
+
+    @ExceptionHandler(BillingService.SubscriptionException.class)
+    public ResponseEntity<ProblemDetail> handleSubscriptionError(BillingService.SubscriptionException ex) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.UNPROCESSABLE_ENTITY);
+        problem.setTitle("Erro na assinatura");
+        problem.setDetail(ex.getMessage());
+        problem.setProperty("timestamp", Instant.now());
+        return ResponseEntity.unprocessableEntity().body(problem);
     }
 
     @ExceptionHandler(Exception.class)

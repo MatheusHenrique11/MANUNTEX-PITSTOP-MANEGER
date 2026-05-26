@@ -1,5 +1,7 @@
 package com.manutex.pitstop.security;
 
+import com.manutex.pitstop.domain.entity.User;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Optional;
@@ -20,5 +22,12 @@ public final class TenantContext {
     public static UUID requireEmpresaId() {
         return currentEmpresaId()
             .orElseThrow(() -> new IllegalStateException("Nenhuma empresa no contexto de segurança"));
+    }
+
+    public static UUID requireUserId(Authentication auth) {
+        if (auth != null && auth.getPrincipal() instanceof User user) {
+            return user.getId();
+        }
+        throw new IllegalStateException("Usuário não autenticado ou principal inválido");
     }
 }

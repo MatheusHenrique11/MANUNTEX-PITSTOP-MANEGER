@@ -11,4 +11,5 @@ import java.util.UUID;
 public interface EmpresaRepository extends JpaRepository<Empresa, UUID> {
     Optional<Empresa> findByCnpj(String cnpj);
     boolean existsByCnpj(String cnpj);
+    Optional<Empresa> findByPaymentGatewayCustomerId(String paymentGatewayCustomerId);
 }
