@@ -1,13 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '@core/services/auth.service';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule],
+  imports: [ReactiveFormsModule, CommonModule, RouterLink],
   template: `
     <div class="min-h-screen flex bg-surface-950">
 
@@ -34,7 +34,7 @@ import { AuthService } from '@core/services/auth.service';
           </div>
           <div>
             <p class="font-bold text-white text-lg leading-none">PitStop Manager</p>
-            <p class="text-xs text-slate-500">by Manutex</p>
+            <p class="text-xs text-slate-500">by RiseCode Studio</p>
           </div>
         </div>
 
@@ -42,12 +42,12 @@ import { AuthService } from '@core/services/auth.service';
         <div class="relative z-10 space-y-6">
           <div>
             <h2 class="text-4xl xl:text-5xl font-extrabold text-white leading-tight tracking-tight">
-              Gestão de<br>
-              <span class="text-petroleum-400">Manutenção</span><br>
-              Industrial
+              Gestão Inteligente<br>
+              <span class="text-petroleum-400">para Oficinas</span><br>
+              Automotivas
             </h2>
             <p class="mt-4 text-slate-400 text-base leading-relaxed max-w-sm">
-              Controle ordens de serviço, frotas e documentos com segurança e eficiência em campo.
+              Controle ordens de serviço, frotas e consulte documentos de veículos direto no Detran com segurança e eficiência.
             </p>
           </div>
 
@@ -61,7 +61,7 @@ import { AuthService } from '@core/services/auth.service';
 
         <!-- Footer -->
         <p class="relative z-10 text-xs text-slate-600">
-          © {{ year }} Manutex · Sistema SaaS de Oficina
+          © {{ year }} RiseCode Studio · Sistema SaaS de Oficina
         </p>
       </div>
 
@@ -84,6 +84,16 @@ import { AuthService } from '@core/services/auth.service';
             <h2 class="text-2xl font-bold text-white">Bem-vindo de volta</h2>
             <p class="text-sm text-slate-400 mt-1">Faça login para acessar o painel</p>
           </div>
+
+          <!-- Registered success alert -->
+          @if (justRegistered()) {
+            <div class="alert-success">
+              <svg viewBox="0 0 24 24" class="w-4 h-4 fill-current flex-shrink-0 mt-0.5">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              Conta criada com sucesso! Faça login para continuar.
+            </div>
+          }
 
           <!-- Session expired alert -->
           @if (sessionExpired()) {
@@ -173,9 +183,33 @@ import { AuthService } from '@core/services/auth.service';
             </button>
           </form>
 
+          <!-- Subscription CTA -->
+          <div class="rounded-2xl border border-petroleum-600/30 bg-petroleum-900/30 p-5 space-y-3 text-center">
+            <p class="text-sm font-medium text-slate-300">Ainda não tem uma conta?</p>
+            <a
+              routerLink="/billing/pricing"
+              class="btn-primary w-full py-3 text-sm flex items-center justify-center gap-2 font-semibold no-underline">
+              <svg viewBox="0 0 24 24" class="w-4 h-4 fill-current flex-shrink-0">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
+              </svg>
+              Conheça os planos e assine já
+            </a>
+            <p class="text-xs text-slate-500">
+              Já possui cadastro?
+              <a routerLink="/signup" class="text-petroleum-400 hover:text-petroleum-300 font-medium transition-colors">Crie sua conta</a>
+            </p>
+          </div>
+
           <!-- Security note -->
           <p class="text-center text-xs text-slate-600">
             🔒 Conexão protegida com JWT · AES-256
+          </p>
+
+          <!-- Legal links -->
+          <p class="text-center text-xs text-slate-600 space-x-2">
+            <a routerLink="/politica-privacidade" class="hover:text-petroleum-400 transition-colors">Política de Privacidade</a>
+            <span>·</span>
+            <a routerLink="/termos-de-uso" class="hover:text-petroleum-400 transition-colors">Termos de Uso</a>
           </p>
         </div>
       </div>
@@ -191,10 +225,11 @@ export class LoginComponent {
   readonly loading = signal(false);
   readonly errorMessage = signal<string | null>(null);
   readonly sessionExpired = signal(false);
+  readonly justRegistered = signal(false);
   readonly showPassword = signal(false);
 
   readonly year = new Date().getFullYear();
-  readonly tags = ['OS Digitais', 'Frota', 'Documentos Criptografados', 'Multi-usuário'];
+  readonly tags = ['OS Digitais', 'Integração Detran', 'Carros e Caminhões'];
 
   readonly form = this.fb.group({
     email:    ['', [Validators.required, Validators.email]],
@@ -203,7 +238,8 @@ export class LoginComponent {
 
   constructor() {
     this.route.queryParams.subscribe(p => {
-      if (p['expired']) this.sessionExpired.set(true);
+      if (p['expired'])    this.sessionExpired.set(true);
+      if (p['registered']) this.justRegistered.set(true);
     });
   }
 

@@ -70,6 +70,17 @@ app:
     email: ${SEED_EMAIL:turbofastgarage@pitstop.com}
     password: ${SEED_PASSWORD:}
 
+  frontend-url: ${FRONTEND_URL:http://localhost:4200}
+
+billing:
+  stripe:
+    secret-key: ${STRIPE_SECRET_KEY:}
+    webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+  nfe:
+    api-url: ${FOCUS_NFE_API_URL:https://homologacao.focusnfe.com.br}
+    api-token: ${FOCUS_NFE_TOKEN:}
+    municipio-prestador: ${NFE_MUNICIPIO_PRESTADOR:3550308}
+
 management:
   endpoints:
     web:
