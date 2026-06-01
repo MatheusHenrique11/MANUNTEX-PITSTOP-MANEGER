@@ -12,7 +12,7 @@ import { RouterLink } from '@angular/router';
         <div>
           <a routerLink="/" class="text-petroleum-400 hover:underline text-sm">← Voltar</a>
           <h1 class="text-3xl font-bold text-white mt-4">Política de Privacidade</h1>
-          <p class="text-sm text-slate-500 mt-1">PitStop Manager · Versão 1.0 · Vigência: 26/05/2026</p>
+          <p class="text-sm text-slate-500 mt-1">Manager PitStop · Versão 1.0 · Vigência: 26/05/2026</p>
         </div>
 
         <section class="space-y-4">

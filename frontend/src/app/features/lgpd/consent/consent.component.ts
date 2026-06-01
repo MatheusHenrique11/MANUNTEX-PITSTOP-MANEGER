@@ -22,7 +22,7 @@ import { forkJoin } from 'rxjs';
           </div>
           <h1 class="text-2xl font-bold text-white">Seus Dados, Seus Direitos</h1>
           <p class="text-sm text-slate-400 mt-1">
-            Para usar o PitStop Manager, precisamos do seu consentimento conforme a
+            Para usar o Manager PitStop, precisamos do seu consentimento conforme a
             <span class="text-petroleum-400">Lei Geral de Proteção de Dados (LGPD)</span>.
           </p>
         </div>
@@ -33,7 +33,7 @@ import { forkJoin } from 'rxjs';
           <div class="space-y-3">
             <h2 class="text-base font-semibold text-white">Política de Privacidade</h2>
             <div class="bg-surface-800 rounded-xl p-4 text-sm text-slate-300 max-h-48 overflow-y-auto leading-relaxed space-y-2">
-              <p>O <strong class="text-white">PitStop Manager</strong> (Manutex) coleta e trata dados pessoais para prestação do serviço de gestão de ordens de serviço.</p>
+              <p>O <strong class="text-white">Manager PitStop</strong> (Manutex) coleta e trata dados pessoais para prestação do serviço de gestão de ordens de serviço.</p>
               <p><strong class="text-white">Dados coletados:</strong> nome, e-mail, CPF/CNPJ (clientes), placas e documentos de veículos.</p>
               <p><strong class="text-white">Finalidade:</strong> Gestão operacional da oficina, emissão de NFS-e e cumprimento de obrigações legais.</p>
               <p><strong class="text-white">Base legal:</strong> Execução de contrato (Art. 7, V LGPD) e consentimento (Art. 7, I LGPD).</p>
@@ -50,7 +50,7 @@ import { forkJoin } from 'rxjs';
               <span class="text-sm text-slate-300 group-hover:text-white transition-colors">
                 Li e aceito a
                 <a routerLink="/politica-privacidade" target="_blank" class="text-petroleum-400 hover:underline">Política de Privacidade</a>
-                do PitStop Manager.
+                do Manager PitStop.
               </span>
             </label>
           </div>
@@ -61,7 +61,7 @@ import { forkJoin } from 'rxjs';
           <div class="space-y-3">
             <h2 class="text-base font-semibold text-white">Termos de Uso</h2>
             <div class="bg-surface-800 rounded-xl p-4 text-sm text-slate-300 max-h-48 overflow-y-auto leading-relaxed space-y-2">
-              <p>Ao usar o PitStop Manager você concorda em utilizar o serviço apenas para fins lícitos relacionados à gestão de oficinas mecânicas.</p>
+              <p>Ao usar o Manager PitStop você concorda em utilizar o serviço apenas para fins lícitos relacionados à gestão de oficinas mecânicas.</p>
               <p><strong class="text-white">Responsabilidades:</strong> Você é responsável pela veracidade dos dados inseridos e pelo acesso de seus colaboradores.</p>
               <p><strong class="text-white">Proibições:</strong> É vedado compartilhar credenciais, inserir dados falsos ou tentar acessar dados de outros tenants.</p>
               <p><strong class="text-white">SLA:</strong> O serviço é fornecido "como está" com disponibilidade alvo de 99,5% (exceto manutenção programada).</p>
@@ -76,7 +76,7 @@ import { forkJoin } from 'rxjs';
               <span class="text-sm text-slate-300 group-hover:text-white transition-colors">
                 Li e aceito os
                 <a routerLink="/termos-de-uso" target="_blank" class="text-petroleum-400 hover:underline">Termos de Uso</a>
-                do PitStop Manager.
+                do Manager PitStop.
               </span>
             </label>
           </div>

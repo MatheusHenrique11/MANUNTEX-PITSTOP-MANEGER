@@ -22,7 +22,7 @@ const STEPS: StatusManutencao[] = ['ABERTA', 'EM_ANDAMENTO', 'AGUARDANDO_PECAS',
           </svg>
         </div>
         <div>
-          <p class="text-sm font-bold text-white leading-tight">PitStop Manager</p>
+          <p class="text-sm font-bold text-white leading-tight">Manager PitStop</p>
           <p class="text-xs text-slate-500 leading-tight">Rastreio de Serviço</p>
         </div>
       </header>
@@ -144,7 +144,7 @@ const STEPS: StatusManutencao[] = ['ABERTA', 'EM_ANDAMENTO', 'AGUARDANDO_PECAS',
             </div>
 
             <p class="text-center text-xs text-slate-600 pb-4">
-              PitStop Manager · Manutex
+              Manager PitStop · Manutex
             </p>
           }
 

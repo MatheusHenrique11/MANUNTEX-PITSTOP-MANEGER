@@ -1,13 +1,13 @@
-# PitStop Manager — Produção (VPS Hostinger 2.25.151.136)
+# Manager PitStop — Produção (VPS Hostinger 2.25.151.136)
 #
 # PRÉ-REQUISITOS na VPS:
-#   - Traefik global já rodando (risecode_default ou riggingcheck_network)
-#   - Container risecode_postgres já rodando
-#   - Banco pitstopmanager_db e usuário criados (ver DEPLOY.md)
+#   - Traefik rodando na rede: riggingcheck_network
+#   - Container risecode_postgres rodando na rede: risecode_default
+#   - Banco managerpitstop_db e usuário criados (ver DEPLOY.md)
 #   - Arquivo .env.production preenchido
 #
 # BUILD LOCAL (rodar da raiz do projeto):
-#   docker build -f backend/Dockerfile -t pitstopmanager/backend:latest .
+#   docker build -f backend/Dockerfile -t managerpitstop/backend:latest .
 #
 # DEPLOY:
 #   docker compose -f docker-compose.prod.yml --env-file .env.production up -d
@@ -19,25 +19,25 @@ version: "3.9"
 
 services:
 
-  pitstopmanager_backend:
-    image: pitstopmanager/backend:latest
-    container_name: pitstopmanager_backend
+  managerpitstop_backend:
+    image: managerpitstop/backend:latest
+    container_name: managerpitstop_backend
     restart: unless-stopped
     env_file: .env.production
     environment:
       SPRING_PROFILES_ACTIVE: prod
     networks:
-      - pitstopmanager_network  # rede interna isolada
-      - risecode_default         # acesso ao postgres e ao Traefik global
-      - riggingcheck_network     # fallback: Traefik pode estar nesta rede
+      - managerpitstop_network  # rede interna isolada
+      - risecode_default         # acesso ao container risecode_postgres
+      - riggingcheck_network     # Traefik está nesta rede
     labels:
       - "traefik.enable=true"
-      - "traefik.docker.network=risecode_default"
-      - "traefik.http.routers.pitstopmanager.rule=Host(`api.pitstopmanager.com`)"
-      - "traefik.http.routers.pitstopmanager.entrypoints=websecure"
-      - "traefik.http.routers.pitstopmanager.tls=true"
-      - "traefik.http.routers.pitstopmanager.tls.certresolver=letsencrypt"
-      - "traefik.http.services.pitstopmanager.loadbalancer.server.port=8080"
+      - "traefik.docker.network=riggingcheck_network"
+      - "traefik.http.routers.managerpitstop.rule=Host(`api.managerpitstop.com.br`)"
+      - "traefik.http.routers.managerpitstop.entrypoints=websecure"
+      - "traefik.http.routers.managerpitstop.tls=true"
+      - "traefik.http.routers.managerpitstop.tls.certresolver=letsencrypt"
+      - "traefik.http.services.managerpitstop.loadbalancer.server.port=8080"
     healthcheck:
       test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q 'UP' || exit 1"]
       interval: 30s
@@ -51,13 +51,13 @@ services:
         max-file: "5"
 
 networks:
-  pitstopmanager_network:
-    name: pitstopmanager_network
+  managerpitstop_network:
+    name: managerpitstop_network
 
-  # Rede onde está o risecode_postgres (e provavelmente o Traefik)
+  # Rede do risecode_postgres
   risecode_default:
     external: true
 
-  # Rede do RiggingCheck — Traefik pode estar aqui; se não existir, remova este bloco
+  # Rede onde o Traefik do RiggingCheck está rodando
   riggingcheck_network:
     external: true

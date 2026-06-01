@@ -30,7 +30,7 @@ function confirmPasswordValidator(): ValidatorFn {
             </svg>
           </div>
           <h1 class="text-2xl font-bold text-white">Cadastro de Empresa</h1>
-          <p class="text-sm text-slate-400 mt-1">Crie sua conta no PitStop Manager</p>
+          <p class="text-sm text-slate-400 mt-1">Crie sua conta no Manager PitStop</p>
         </div>
 
         <form [formGroup]="form" (ngSubmit)="submit()" class="space-y-8 bg-surface-900 rounded-2xl border border-surface-700 p-8">

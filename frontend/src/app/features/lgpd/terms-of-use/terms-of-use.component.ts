@@ -12,17 +12,17 @@ import { RouterLink } from '@angular/router';
         <div>
           <a routerLink="/" class="text-petroleum-400 hover:underline text-sm">← Voltar</a>
           <h1 class="text-3xl font-bold text-white mt-4">Termos de Uso</h1>
-          <p class="text-sm text-slate-500 mt-1">PitStop Manager · Versão 1.0 · Vigência: 26/05/2026</p>
+          <p class="text-sm text-slate-500 mt-1">Manager PitStop · Versão 1.0 · Vigência: 26/05/2026</p>
         </div>
 
         <section class="space-y-4">
           <h2 class="text-lg font-semibold text-white border-b border-surface-700 pb-2">1. Aceite</h2>
-          <p class="text-sm">Ao acessar ou usar o PitStop Manager você concorda com estes Termos. Se não concordar, não utilize o serviço.</p>
+          <p class="text-sm">Ao acessar ou usar o Manager PitStop você concorda com estes Termos. Se não concordar, não utilize o serviço.</p>
         </section>
 
         <section class="space-y-4">
           <h2 class="text-lg font-semibold text-white border-b border-surface-700 pb-2">2. Descrição do Serviço</h2>
-          <p class="text-sm">O PitStop Manager é uma plataforma SaaS de gestão de ordens de serviço para oficinas mecânicas, fornecida pela <strong class="text-white">Manutex Tecnologia Ltda.</strong></p>
+          <p class="text-sm">O Manager PitStop é uma plataforma SaaS de gestão de ordens de serviço para oficinas mecânicas, fornecida pela <strong class="text-white">Manutex Tecnologia Ltda.</strong></p>
         </section>
 
         <section class="space-y-4">

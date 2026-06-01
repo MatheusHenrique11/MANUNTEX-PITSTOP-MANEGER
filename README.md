@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  Manutex PitStop Manager
+  Manager PitStop
   <br>
 </h1>
 
@@ -22,7 +22,7 @@
 
 ## Visão Geral
 
-O **Manutex PitStop Manager** é um SaaS B2B de gestão para oficinas mecânicas. Cada empresa opera em seu próprio contexto completamente isolado (multi-tenant), com controle de acesso por perfil (RBAC), criptografia de ponta a ponta nos documentos, sistema de assinaturas com emissão automática de NFS-e e conformidade integral com a **Lei Geral de Proteção de Dados (LGPD — Lei 13.709/2018)**.
+O **Manager PitStop** é um SaaS B2B de gestão para oficinas mecânicas. Cada empresa opera em seu próprio contexto completamente isolado (multi-tenant), com controle de acesso por perfil (RBAC), criptografia de ponta a ponta nos documentos, sistema de assinaturas com emissão automática de NFS-e e conformidade integral com a **Lei Geral de Proteção de Dados (LGPD — Lei 13.709/2018)**.
 
 ---
 

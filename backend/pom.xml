@@ -14,7 +14,7 @@
     <groupId>com.manutex</groupId>
     <artifactId>pitstop-backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>Manutex PitStop Manager - Backend</name>
+    <name>Manager PitStop - Backend</name>
     <description>SaaS para controle de manutenções automotivas com segurança Zero Leak</description>
 
     <properties>

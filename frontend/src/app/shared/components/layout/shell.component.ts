@@ -120,7 +120,7 @@ interface NavItem {
               <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
             </svg>
           </button>
-          <span class="text-sm font-bold text-white">PitStop Manager</span>
+          <span class="text-sm font-bold text-white">Manager PitStop</span>
           <div class="w-8"></div>
         </header>
 
