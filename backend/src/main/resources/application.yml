@@ -67,8 +67,13 @@ app:
 
   seed:
     enabled: ${SEED_TEST_USER:false}
-    email: ${SEED_EMAIL:turbofastgarage@pitstop.com}
+    email: ${SEED_EMAIL:demo@managerpitstop.com.br}
     password: ${SEED_PASSWORD:}
+    full-name: ${SEED_FULL_NAME:Super Admin Demo}
+    empresa-nome: ${SEED_EMPRESA_NOME:Manager PitStop Demo}
+    empresa-cnpj: ${SEED_EMPRESA_CNPJ:11.222.333/0001-81}
+    empresa-cidade: ${SEED_EMPRESA_CIDADE:São Paulo}
+    empresa-uf: ${SEED_EMPRESA_UF:SP}
 
   frontend-url: ${FRONTEND_URL:http://localhost:4200}
 
