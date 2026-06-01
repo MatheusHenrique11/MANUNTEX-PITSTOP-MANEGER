@@ -1,0 +1,63 @@
+# PitStop Manager — Produção (VPS Hostinger 2.25.151.136)
+#
+# PRÉ-REQUISITOS na VPS:
+#   - Traefik global já rodando (risecode_default ou riggingcheck_network)
+#   - Container risecode_postgres já rodando
+#   - Banco pitstopmanager_db e usuário criados (ver DEPLOY.md)
+#   - Arquivo .env.production preenchido
+#
+# BUILD LOCAL (rodar da raiz do projeto):
+#   docker build -f backend/Dockerfile -t pitstopmanager/backend:latest .
+#
+# DEPLOY:
+#   docker compose -f docker-compose.prod.yml --env-file .env.production up -d
+#
+# VALIDAR:
+#   docker compose -f docker-compose.prod.yml --env-file .env.production config
+
+version: "3.9"
+
+services:
+
+  pitstopmanager_backend:
+    image: pitstopmanager/backend:latest
+    container_name: pitstopmanager_backend
+    restart: unless-stopped
+    env_file: .env.production
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+    networks:
+      - pitstopmanager_network  # rede interna isolada
+      - risecode_default         # acesso ao postgres e ao Traefik global
+      - riggingcheck_network     # fallback: Traefik pode estar nesta rede
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=risecode_default"
+      - "traefik.http.routers.pitstopmanager.rule=Host(`api.pitstopmanager.com`)"
+      - "traefik.http.routers.pitstopmanager.entrypoints=websecure"
+      - "traefik.http.routers.pitstopmanager.tls=true"
+      - "traefik.http.routers.pitstopmanager.tls.certresolver=letsencrypt"
+      - "traefik.http.services.pitstopmanager.loadbalancer.server.port=8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q 'UP' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "5"
+
+networks:
+  pitstopmanager_network:
+    name: pitstopmanager_network
+
+  # Rede onde está o risecode_postgres (e provavelmente o Traefik)
+  risecode_default:
+    external: true
+
+  # Rede do RiggingCheck — Traefik pode estar aqui; se não existir, remova este bloco
+  riggingcheck_network:
+    external: true
