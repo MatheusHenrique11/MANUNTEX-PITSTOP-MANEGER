@@ -3,14 +3,12 @@ const path = require('path');
 
 const targetDir = path.join(__dirname, '../src/environments');
 const targetFile = path.join(targetDir, 'environment.prod.ts');
-const backendUrl = (
-  process.env.API_BASE_URL ||
-  process.env.RAILWAY_BACKEND_URL ||
-  ''
-).replace(/\/$/, '');
 
-if (!backendUrl) {
-  console.error('[set-env] ERRO: API_BASE_URL não está definido. O build vai usar URL relativa e falhar em produção.');
+// VITE_API_URL = https://api.managerpitstop.com.br/api  →  apiUrl = .../api/v1
+const apiUrl = (process.env.VITE_API_URL || '').replace(/\/$/, '');
+
+if (!apiUrl) {
+  console.error('[set-env] ERRO: VITE_API_URL não está definido. Configure na Vercel: VITE_API_URL=https://api.managerpitstop.com.br/api');
   process.exitCode = 1;
 }
 
@@ -18,10 +16,10 @@ fs.mkdirSync(targetDir, { recursive: true });
 
 const content = `export const environment = {
   production: true,
-  apiUrl: '${backendUrl}/api/v1',
+  apiUrl: '${apiUrl}/v1',
 };
 `;
 
 fs.writeFileSync(targetFile, content, 'utf8');
 
-console.log(`[set-env] apiUrl configurado para: ${backendUrl || '(vazio!)'}/api/v1`);
+console.log(`[set-env] apiUrl configurado para: ${apiUrl || '(vazio!)'}/v1`);

@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: "RAILWAY_BACKEND_URL/api/v1",
+  apiUrl: 'VITE_API_URL_NOT_SET/v1',
 };
