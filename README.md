@@ -6,23 +6,35 @@
 
 <p align="center">
   Plataforma SaaS multi-tenant para gestão completa de oficinas automotivas —<br>
-  ordens de serviço, frotas, documentos, faturamento e conformidade LGPD em um único lugar.
+  ordens de serviço, frotas, documentos, faturamento, metas e conformidade LGPD.
 </p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Java-21-007396?style=flat-square&logo=openjdk&logoColor=white" />
   <img src="https://img.shields.io/badge/Spring Boot-3.3.2-6DB33F?style=flat-square&logo=springboot&logoColor=white" />
   <img src="https://img.shields.io/badge/Angular-17-DD0031?style=flat-square&logo=angular&logoColor=white" />
-  <img src="https://img.shields.io/badge/PostgreSQL-16-4169E1?style=flat-square&logo=postgresql&logoColor=white" />
-  <img src="https://img.shields.io/badge/LGPD-Compliant-009c3b?style=flat-square" />
+  <img src="https://img.shields.io/badge/PostgreSQL-15-4169E1?style=flat-square&logo=postgresql&logoColor=white" />
   <img src="https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white" />
+  <img src="https://img.shields.io/badge/LGPD-Compliant-009c3b?style=flat-square" />
 </p>
+
+<p align="center">
+  <strong>Produção:</strong>
+  <a href="https://managerpitstop.com.br">managerpitstop.com.br</a>
+  ·
+  <a href="https://api.managerpitstop.com.br/actuator/health">api.managerpitstop.com.br</a>
+</p>
+
+---
+
+> **Software Proprietário — © 2025 RiseCode Studio. Todos os direitos reservados.**
+> Consulte a seção [Licença e Direitos Autorais](#licença-e-direitos-autorais) para os termos completos.
 
 ---
 
 ## Visão Geral
 
-O **Manager PitStop** é um SaaS B2B de gestão para oficinas mecânicas. Cada empresa opera em seu próprio contexto completamente isolado (multi-tenant), com controle de acesso por perfil (RBAC), criptografia de ponta a ponta nos documentos, sistema de assinaturas com emissão automática de NFS-e e conformidade integral com a **Lei Geral de Proteção de Dados (LGPD — Lei 13.709/2018)**.
+O **Manager PitStop** é um SaaS B2B desenvolvido pela **RiseCode Studio** para gestão de oficinas mecânicas. Cada empresa opera em seu próprio contexto completamente isolado (multi-tenant), com controle de acesso por perfil (RBAC), criptografia de ponta a ponta nos documentos, enforcement automático de limites por plano de assinatura, sistema de pagamentos com emissão automática de NFS-e e conformidade integral com a **Lei Geral de Proteção de Dados (LGPD — Lei 13.709/2018)**.
 
 ---
 
@@ -32,54 +44,76 @@ O **Manager PitStop** é um SaaS B2B de gestão para oficinas mecânicas. Cada e
 
 | Módulo | Descrição | Feature Flag |
 |---|---|---|
-| **Ordens de Serviço** | Abertura, atribuição a mecânico, acompanhamento de status (Aberta → Em Andamento → Concluída) e geração de relatório em PDF | `MAINTENANCE_MODULE` |
-| **Rastreio Público** | Link público com token único para o cliente acompanhar sua OS sem login | — |
-| **Gestão de Veículos** | Cadastro com placa, chassi (mascarado), RENAVAM (mascarado), marca, modelo e histórico completo de serviços | `VEHICLE_MANAGEMENT` |
-| **Clientes** | Cadastro com CPF/CNPJ, telefone, e-mail e vinculação a múltiplos veículos; CPF mascarado por perfil | — |
-| **Cofre de Documentos** | Upload, visualização e controle de validade de CRLV, laudos e demais documentos com criptografia AES-256-GCM | `DOCUMENT_VAULT` |
+| **Ordens de Serviço** | Abertura, atribuição a mecânico, ciclo de status (Aberta → Em Andamento → Concluída/Cancelada), relatório em PDF | `MAINTENANCE_MODULE` |
+| **Rastreio Público** | Link com token único para o cliente acompanhar a OS sem login | — |
+| **Gestão de Veículos** | Cadastro com placa, chassi (mascarado), RENAVAM (mascarado), marca/modelo e histórico de serviços | `VEHICLE_MANAGEMENT` |
+| **Clientes** | CPF/CNPJ, telefone, e-mail; CPF mascarado por perfil; vinculação a múltiplos veículos | — |
+| **Cofre de Documentos** | Upload, visualização e controle de validade (CRLV, laudos) com pipeline AES-256-GCM + S3 | `DOCUMENT_VAULT` |
 
 ### Gestão de Pessoas e Metas
 
 | Módulo | Descrição | Feature Flag |
 |---|---|---|
-| **Metas por Mecânico** | Definição de metas mensais de faturamento por mecânico, acompanhamento em tempo real e exportação de relatório PDF para RH | `GOALS_MODULE` |
-| **Gestão de Usuários** | Criação, ativação/desativação e alteração de perfil (GERENTE, MECÂNICO, RECEPCIONISTA) com isolamento por empresa | — |
+| **Metas por Mecânico** | Metas mensais de faturamento por mecânico, acompanhamento em tempo real e relatório PDF para RH | `GOALS_MODULE` |
+| **Gestão de Usuários** | Criação, ativação/desativação e perfil (GERENTE, MECÂNICO, RECEPCIONISTA) com isolamento por empresa | — |
 
 ### Financeiro e Faturamento
 
 | Módulo | Descrição | Feature Flag |
 |---|---|---|
-| **Financeiro** | Visão financeira consolidada das ordens de serviço concluídas por período | `FINANCIAL_MODULE` |
-| **Assinaturas (Billing)** | Planos Starter / Professional / Enterprise via Stripe; trial de 14 dias; webhook de pagamento com validação HMAC-SHA256 | — |
-| **NFS-e Automática** | Emissão automática de Nota Fiscal de Serviço Eletrônica via Focus NFe a cada pagamento confirmado; idempotência via `gatewayInvoiceId` | — |
-| **Dashboard de Faturamento** | Histórico de faturas com download de PDF/XML das NFS-e emitidas | — |
+| **Financeiro** | Visão consolidada das OS concluídas por período | `FINANCIAL_MODULE` |
+| **Assinaturas (Billing)** | Planos Starter / Professional / Enterprise via Stripe; trial; webhook HMAC-SHA256 | — |
+| **NFS-e Automática** | Emissão via Focus NFe a cada `invoice.paid`; idempotência por `gatewayInvoiceId` | — |
+| **Dashboard de Faturamento** | Histórico de faturas com PDF/XML das NFS-e | — |
 
 ### Analítico e Relatórios
 
 | Módulo | Descrição | Feature Flag |
 |---|---|---|
-| **Dashboard** | KPIs e métricas consolidadas: OS abertas, em andamento, concluídas e valor total | — |
+| **Dashboard** | KPIs consolidados: OS abertas, em andamento, concluídas e valor total | — |
 | **Relatórios** | Análises por período, mecânico e tipo de serviço | `ANALYTICS_DASHBOARD` |
 
 ### Configuração e Administração
 
 | Módulo | Descrição | Perfil |
 |---|---|---|
-| **Controle de Módulos** | Ativação e desativação de feature flags por empresa em tempo real | `ROLE_ADMIN` |
-| **Gestão de Empresas** | Cadastro de novos tenants com dados fiscais completos via painel admin | `ROLE_ADMIN` |
-| **Auto-cadastro (Signup)** | Formulário público de auto-cadastro com validação de CNPJ (dígitos verificadores) e preenchimento automático via BrasilAPI | — |
-| **Configuração da Empresa** | Logo, CNPJ, endereço e dados fiscais para emissão de NFS-e | `ROLE_GERENTE` |
+| **Controle de Módulos** | Toggle de feature flags por empresa em tempo real via painel Angular | `ROLE_ADMIN` |
+| **Gestão de Empresas** | Cadastro de novos tenants com dados fiscais completos | `ROLE_ADMIN` |
+| **Auto-cadastro (Signup)** | Formulário público com validação matemática de CNPJ e preenchimento via BrasilAPI | — |
+| **Configuração da Empresa** | Logo, dados fiscais para NFS-e | `ROLE_GERENTE` |
 
 ### Privacidade e LGPD
 
 | Módulo | Descrição |
 |---|---|
-| **Consentimento** | Coleta e registro de consentimento por versão de política (Política de Privacidade + Termos de Uso) — Art. 8 LGPD |
-| **Portal do Titular** | Interface para solicitar acesso, portabilidade, correção, anonimização e oposição ao tratamento — Art. 18 LGPD |
-| **Exportação de Dados** | Download de todos os dados pessoais em formato JSON estruturado (portabilidade) |
-| **Anonimização** | Substituição de PII (e-mail, nome, senha) com revogação de sessões e marcação `deleted_at` |
-| **Retenção Automática** | Job diário às 03h: hard-delete de registros anonimizados após 90 dias + limpeza de tokens expirados |
-| **Audit Log** | Registro imutável de todas as operações sobre dados pessoais (exportação, anonimização, consentimento) |
+| **Consentimento** | Coleta por versão de política (PP + ToU) com IP e user-agent — Art. 8 LGPD |
+| **Portal do Titular** | Acesso, portabilidade, correção, anonimização, oposição — Art. 18 LGPD |
+| **Exportação de Dados** | JSON estruturado completo (portabilidade) |
+| **Anonimização** | Substituição de PII + revogação de sessões + `deleted_at` |
+| **Retenção Automática** | Job diário às 03h: hard-delete após 90 dias + limpeza de tokens expirados |
+| **Audit Log** | Registro imutável de todas as operações sobre dados pessoais |
+
+---
+
+## Planos e Enforcement de Limites
+
+O enforcement é aplicado no **backend** antes de cada operação. Tentar ultrapassar o limite retorna HTTP **402 Payment Required**.
+
+| Recurso | STARTER | PROFESSIONAL | ENTERPRISE |
+|---|---|---|---|
+| **Preço** | R$ 89/mês | R$ 179/mês | R$ 349/mês |
+| **OS por mês** | 50 | Ilimitado | Ilimitado |
+| **Mecânicos ativos** | 2 | Ilimitado | Ilimitado |
+| **Armazenamento** | 5 GB | 50 GB | Ilimitado |
+| Módulo Manutenções | ✅ | ✅ | ✅ |
+| Gestão de Veículos | ✅ | ✅ | ✅ |
+| Cofre de Documentos | ✅ | ✅ | ✅ |
+| Metas / Financeiro / Relatórios | ❌ | ✅ | ✅ |
+| Notificações | ❌ | ✅ | ✅ |
+| Integração DETRAN | ❌ | ❌ | ✅ |
+| API Pública | ❌ | ❌ | ✅ |
+
+**Fluxo de ativação:** ao confirmar o pagamento via webhook Stripe, o `PlanEnforcementService.activateFeaturesForPlan()` ativa automaticamente as feature flags correspondentes ao plano adquirido e desativa as demais.
 
 ---
 
@@ -89,10 +123,10 @@ O **Manager PitStop** é um SaaS B2B de gestão para oficinas mecânicas. Cada e
 |---|---|
 | `ROLE_ADMIN` | Acesso total; gerencia todas as empresas, usuários, feature flags e DSARs globais |
 | `ROLE_GERENTE` | Cria e gerencia OS, metas, usuários da própria empresa; acessa faturamento e relatórios |
-| `ROLE_MECANICO` | Visualiza apenas as próprias OS e metas do mês; não acessa dados financeiros |
-| `ROLE_RECEPCIONISTA` | Abre e consulta OS; sem acesso a dados financeiros, metas ou relatórios |
+| `ROLE_MECANICO` | Visualiza apenas as próprias OS e metas do mês; sem acesso a dados financeiros |
+| `ROLE_RECEPCIONISTA` | Abre e consulta OS; sem acesso a financeiro, metas ou relatórios |
 
-> Dados sensíveis (chassi, RENAVAM, CPF/CNPJ completo) são mascarados para `ROLE_MECANICO` e `ROLE_RECEPCIONISTA`.
+> Chassi, RENAVAM e CPF completo são mascarados para `ROLE_MECANICO` e `ROLE_RECEPCIONISTA`.
 
 ---
 
@@ -103,67 +137,68 @@ O **Manager PitStop** é um SaaS B2B de gestão para oficinas mecânicas. Cada e
 | Tecnologia | Uso |
 |---|---|
 | **Spring Security** | JWT em cookies HTTP-Only + SameSite; refresh token rotation; RBAC via `@PreAuthorize` |
-| **Spring Data JPA** | PostgreSQL 16 + Hibernate 6; `@SQLRestriction` para soft-delete transparente |
+| **Spring Data JPA** | PostgreSQL 15 + Hibernate 6; `@SQLRestriction` para soft-delete transparente |
 | **Flyway** | Migrations versionadas (V1–V8); baseline automático |
-| **Hibernate Validator** | `@CNPJ`, `@CPF`, validações customizadas de placa e chassi |
+| **Togglz** | Feature flags com toggle via API REST; estado persistido no banco |
 | **Bucket4j** | Rate limiting por IP (60 req/min) com header `X-RateLimit-Remaining` |
 | **OpenPDF** | Relatórios mensais de metas em PDF |
 | **MinIO / S3** | Armazenamento de documentos; URLs pré-assinadas com expiração de 5 min |
-| **RestClient** (Spring 6.1) | Integração HTTP com BrasilAPI, Focus NFe e Stripe |
-| **Jackson** | Serialização JSON; `@JsonIgnoreProperties` nos contratos externos |
+| **RestClient** (Spring 6.1) | Integrações HTTP com BrasilAPI, Focus NFe e Stripe |
+| **Hibernate Validator** | `@CNPJ`, `@CPF`, validadores customizados de placa, chassi e RENAVAM |
 
 ### Frontend — Angular 17
 
 | Tecnologia | Uso |
 |---|---|
 | **Standalone Components** | Sem `NgModule`; lazy loading por rota via `loadComponent` |
-| **Signals** | Estado reativo (`signal`, `computed`) sem RxJS para dados de UI |
-| **Reactive Forms** | Formulários com validadores customizados (CNPJ matemático, confirmação de senha) |
-| **HttpClient + Interceptors** | Credenciais automáticas; renovação silenciosa de token expirado |
+| **Signals** | Estado reativo (`signal`, `computed`) para auth, flags e consentimento |
+| **Reactive Forms** | Validadores customizados (CNPJ matemático, confirmação de senha) |
+| **HttpClient + Interceptors** | `credentials`, `auth-refresh` (renovação silenciosa) e `error` |
 | **Guards encadeados** | `authGuard` → `consentGuard` → `subscriptionGuard` → `featureFlagGuard` → `roleGuard` |
 | **Tailwind CSS** | Design system customizado: paleta `petroleum`, `safety`, `surface` |
 
-### Infraestrutura
+### Infraestrutura e Deploy
 
-| Componente | Descrição |
-|---|---|
-| **Docker Compose** | PostgreSQL 16 + MinIO com bucket privado provisionado automaticamente |
-| **Railway** | Deploy em produção via variáveis de ambiente |
-| **BrasilAPI** | Consulta de dados cadastrais de CNPJ (gratuita, sem chave) |
-| **Stripe** | Processamento de pagamentos; webhook validado por HMAC-SHA256 |
-| **Focus NFe** | Emissão de NFS-e em ambiente de homologação e produção |
+| Componente | Ambiente | Descrição |
+|---|---|---|
+| **Vercel** | Produção (frontend) | Deploy automático; `set-env.js` injeta `VITE_API_URL` em build time |
+| **VPS (Docker + Traefik)** | Produção (backend) | Spring Boot em container; Traefik como reverse proxy com TLS automático |
+| **PostgreSQL 15** | VPS | Banco de dados principal |
+| **MinIO** | VPS | Object storage S3-compatível para documentos cifrados |
+| **Docker Compose** | Desenvolvimento | PostgreSQL + MinIO provisionados automaticamente |
+| **BrasilAPI** | Integração | Consulta de CNPJ pública, sem chave de API |
+| **Stripe** | Integração | Pagamentos; webhook validado por HMAC-SHA256 |
+| **Focus NFe** | Integração | Emissão de NFS-e em homologação e produção |
 
 ---
 
 ## Segurança
 
-O projeto implementa o modelo **Defense in Depth** com múltiplas camadas:
-
 ### Autenticação e Sessão
 - JWT em cookies `HttpOnly + Secure + SameSite=None` — nunca no `localStorage`
-- Refresh tokens persistidos apenas como hash SHA-256; o token raw nunca toca o banco
-- Rotação automática de refresh token a cada uso (proteção contra replay)
-- Detecção de roubo de token: segundo uso do mesmo refresh token revoga toda a família
+- Claims JWT: `subject` (email), `roles`, `empresaId`, `userId`
+- Refresh tokens persistidos apenas como hash SHA-256
+- Rotação automática de refresh token a cada uso
+- Detecção de roubo: segundo uso do mesmo refresh token revoga toda a família
 
 ### Dados em Repouso
 - Documentos cifrados com **AES-256-GCM** + IV aleatório de 12 bytes antes do upload
-- `storageKey` nunca exposta ao frontend — URLs de download são pré-assinadas com expiração
-- Senhas com hash **BCrypt** (custo 12)
+- `storageKey` nunca exposta ao frontend — download via URLs pré-assinadas com expiração
+- Senhas com hash **BCrypt** custo 12
 
 ### Proteção de API
 - Rate limiting por IP em todas as rotas
 - Validação de arquivos por **Magic Numbers** (não por extensão)
 - HMAC-SHA256 na validação de webhooks Stripe
-- Headers de segurança: CSP, `frame-ancestors 'none'`, Referrer-Policy, Permissions-Policy
+- Headers: CSP, `frame-ancestors 'none'`, Referrer-Policy, Permissions-Policy
 
 ### Isolamento Multi-Tenant
-- `empresaId` propagado pelo JWT claim e verificado em **todas** as queries
-- `@SQLRestriction` automático em entidades com soft-delete
-- Sem possibilidade de acesso cross-tenant por design (não apenas por validação)
+- `empresaId` e `userId` propagados pelo JWT e verificados em todas as queries
+- Sem possibilidade de acesso cross-tenant por design
 
-### Mascaramento de Dados
-- CPF/CNPJ de clientes: exibido completo apenas para `ROLE_ADMIN` e `ROLE_GERENTE`
-- Chassi e RENAVAM: apenas últimos 3–4 dígitos visíveis para mecânicos e recepcionistas
+### Mascaramento de Dados Sensíveis
+- CPF/CNPJ de clientes: completo apenas para `ROLE_ADMIN` e `ROLE_GERENTE`
+- Chassi e RENAVAM: apenas últimos 3–4 dígitos para mecânicos e recepcionistas
 
 ---
 
@@ -191,29 +226,29 @@ O projeto implementa o modelo **Defense in Depth** com múltiplas camadas:
 ```
 GET /api/v1/tenants/lookup-cnpj/{cnpj}
 ```
-Preenche automaticamente razão social, endereço e dados fiscais no formulário de cadastro. Sem chave de API necessária.
+Preenche razão social, endereço e dados fiscais automaticamente. Sem chave de API.
 
 ### Stripe — Pagamentos
-- Criação de sessão de checkout (`criarCheckout`)
-- Webhook `invoice.paid` → atualiza status da assinatura e dispara emissão de NFS-e
-- Webhook `customer.subscription.deleted` → suspende acesso
+- Sessão de checkout por plano (`criarCheckout`)
+- `invoice.paid` → ativa assinatura + ativa feature flags do plano + emite NFS-e
+- `customer.subscription.deleted` → suspende acesso
+- `invoice.payment_failed` → altera status para `PAST_DUE`
 
 ### Focus NFe — Nota Fiscal de Serviço
-- Emissão automática após `invoice.paid` com dados completos do Tomador (endereço LGPD-ready)
-- Idempotência via `gatewayInvoiceId` — sem risco de NFS-e duplicada em retentativas
-- Modo mock local quando `FOCUS_NFE_TOKEN` não está configurado
+- Emissão automática após `invoice.paid` com dados fiscais completos do Tomador
+- Idempotência via `gatewayInvoiceId` — sem NFS-e duplicada em retentativas
+- Mock local quando `FOCUS_NFE_TOKEN` não está configurado
 
 ---
 
 ## Como Executar
 
 ### Pré-requisitos
-
 - Docker e Docker Compose
-- Java 21 (recomendado: SDKMAN ou ASDF)
+- Java 21
 - Node.js 20+ e npm
 
-### 1. Infraestrutura (banco + storage)
+### 1. Infraestrutura
 
 ```bash
 docker compose up -d
@@ -229,7 +264,7 @@ docker compose up -d
 
 ```bash
 cd backend
-cp .env.example .env   # configure as variáveis necessárias
+cp .env.example .env   # configure as variáveis
 ./mvnw spring-boot:run
 ```
 
@@ -253,63 +288,67 @@ Aplicação disponível em `http://localhost:4200`.
 
 | Variável | Descrição |
 |---|---|
-| `DATABASE_URL` | JDBC URL do PostgreSQL (`jdbc:postgresql://...`) |
-| `JWT_SECRET` | Segredo HS256 — mínimo 256 bits (Base64) |
-| `ENCRYPTION_MASTER_KEY` | Chave mestre AES-256 para documentos (Base64) |
-| `CORS_ALLOWED_ORIGINS` | Origens permitidas pelo CORS (ex: `https://app.manutex.com.br`) |
+| `DATABASE_URL` | JDBC URL do PostgreSQL |
+| `JWT_SECRET` | Segredo HS512 — mínimo 64 caracteres |
+| `ENCRYPTION_MASTER_KEY` | Chave AES-256 para documentos (Base64) |
+| `CORS_ALLOWED_ORIGINS` | Origens CORS (ex: `https://managerpitstop.com.br`) |
+
+### Variável do frontend (Vercel)
+
+| Variável | Valor em produção |
+|---|---|
+| `VITE_API_URL` | `https://api.managerpitstop.com.br/api` |
+
+> O script `set-env.js` lê `VITE_API_URL` em build time e gera `environment.prod.ts` com `apiUrl = VITE_API_URL + '/v1'`.
 
 ### Integrações (opcionais em desenvolvimento)
 
 | Variável | Descrição |
 |---|---|
-| `STRIPE_SECRET_KEY` | Chave secreta Stripe (mock ativo quando vazio) |
-| `STRIPE_WEBHOOK_SECRET` | Segredo de validação do webhook Stripe |
-| `FOCUS_NFE_TOKEN` | Token da API Focus NFe (mock ativo quando vazio) |
-| `FOCUS_NFE_API_URL` | URL da API Focus NFe (padrão: homologação) |
-| `NFE_MUNICIPIO_PRESTADOR` | Código IBGE do município do prestador |
+| `STRIPE_SECRET_KEY` | Chave Stripe (mock ativo quando vazio) |
+| `STRIPE_WEBHOOK_SECRET` | Segredo de validação HMAC-SHA256 |
+| `FOCUS_NFE_TOKEN` | Token Focus NFe (mock ativo quando vazio) |
 | `STORAGE_ENDPOINT` | Endpoint S3-compatível (MinIO em dev) |
 | `STORAGE_BUCKET` | Nome do bucket (padrão: `pitstop-docs`) |
-| `FRONTEND_URL` | URL do frontend para redirecionamentos de pagamento |
 
 ---
 
 ## Testes
 
-### Backend (217 testes)
+### Backend — 218 testes
 
 ```bash
 cd backend
 ./mvnw test
 ```
 
-Camadas cobertas:
-- **Serviços** — `@ExtendWith(MockitoExtension.class)` com cenários de regras de negócio
-- **Controllers** — `@WebMvcTest` com cenários de autorização por perfil
-- **Filtros de segurança** — Rate limiting, JWT, validação de entrada
+| Camada | Ferramenta | Exemplos de cobertura |
+|---|---|---|
+| Serviços | `MockitoExtension` | Regras de negócio, enforcement de plano, LGPD |
+| Controllers | `@WebMvcTest` | Autorização por perfil, respostas HTTP |
+| Filtros | Mockito | Rate limiting, validação JWT |
 
 ### Frontend
 
 ```bash
 cd frontend
-npm test
+npm test   # requer ChromeHeadless
 ```
-
-Cobertura: serviços HTTP (`HttpClientTestingModule`) e componentes standalone (Karma + Jasmine).
 
 ---
 
-## Migrações do Banco
+## Migrações do Banco (Flyway)
 
 | Versão | Descrição |
 |---|---|
-| **V1** | Schema inicial — `users`, `clientes`, `veiculos`, `documentos`, `manutencoes`, `refresh_tokens`, `feature_toggles` |
-| **V2** | Campos de manutenção estendidos + tabela `empresa_config` (logo, configurações) |
-| **V3** | Coluna `tracking_token` em `manutencoes` para rastreio público |
-| **V4** | Suporte multi-tenant — tabela `empresas` + coluna `empresa_id` em `users` e `clientes` |
-| **V5** | Metas por mecânico — tabela `metas_mecanico` |
-| **V6** | Billing — tabelas `assinaturas` e `faturas_nfe`; campos de assinatura em `empresas` |
-| **V7** | Dados fiscais em `empresas` (razão social, endereço completo, e-mail e telefone fiscal para NFS-e) |
-| **V8** | LGPD — `deleted_at` em `users`/`clientes`; tabelas `user_consents`, `data_subject_requests`, `audit_logs` |
+| **V1** | Schema inicial: `users`, `clientes`, `veiculos`, `documentos`, `manutencoes`, `refresh_tokens`, `feature_toggles` |
+| **V2** | Campos de manutenção estendidos + tabela `empresa_config` |
+| **V3** | Coluna `tracking_token` em `manutencoes` (rastreio público) |
+| **V4** | Multi-tenant: tabela `empresas` + `empresa_id` em `users` e `clientes` |
+| **V5** | Metas por mecânico: tabela `metas_mecanico` |
+| **V6** | Billing: tabelas `assinaturas` e `faturas_nfe`; campos de assinatura em `empresas` |
+| **V7** | Dados fiscais em `empresas` (razão social, endereço, e-mail/telefone fiscal para NFS-e) |
+| **V8** | LGPD: `deleted_at` em `users`/`clientes`; tabelas `user_consents`, `data_subject_requests`, `audit_logs` |
 
 ---
 
@@ -319,53 +358,84 @@ Cobertura: serviços HTTP (`HttpClientTestingModule`) e componentes standalone (
 Manutex-PitStop-Manager/
 ├── backend/
 │   ├── src/main/java/com/manutex/pitstop/
-│   │   ├── config/          # SecurityConfig, BillingProperties, JpaAuditing
+│   │   ├── config/           # SecurityConfig, AppFeatures (Togglz), JpaAuditing
 │   │   ├── domain/
-│   │   │   ├── entity/      # User, Cliente, Veiculo, Empresa, Assinatura, FaturaNfe,
-│   │   │   │                #   UserConsent, DataSubjectRequest, AuditLog…
-│   │   │   ├── enums/       # UserRole, StatusManutencao, SubscriptionStatus,
-│   │   │   │                #   ConsentType, DsarType, DsarStatus…
-│   │   │   └── repository/  # Spring Data JPA repositories
-│   │   ├── security/        # JwtService, JwtAuthenticationFilter, TenantContext
-│   │   ├── service/         # Regras de negócio (LgpdService, BillingService,
-│   │   │                    #   FocusNfeService, CnpjLookupService, DataRetentionService…)
+│   │   │   ├── entity/       # User, Empresa, Cliente, Veiculo, Manutencao,
+│   │   │   │                 #   Assinatura, FaturaNfe, UserConsent, AuditLog…
+│   │   │   ├── enums/        # UserRole, SubscriptionPlan, PlanLimits,
+│   │   │   │                 #   StatusManutencao, ConsentType, DsarType…
+│   │   │   ├── repository/   # Spring Data JPA repositories
+│   │   │   └── validation/   # @Placa, @Chassi, @Renavam
+│   │   ├── security/         # JwtService, JwtAuthenticationFilter,
+│   │   │                     #   TenantContext, TenantDetails
+│   │   ├── service/          # AuthService, BillingService, LgpdService,
+│   │   │                     #   PlanEnforcementService, ManutencaoService,
+│   │   │                     #   DocumentoService, FocusNfeService,
+│   │   │                     #   DataRetentionService, TokenCleanupService…
 │   │   └── web/
-│   │       ├── controller/  # REST endpoints (AuthController, LgpdController,
-│   │       │                #   BillingController, WebhookController, TenantController…)
-│   │       ├── dto/         # Request/Response records
-│   │       ├── exception/   # GlobalExceptionHandler (ProblemDetail RFC 7807)
-│   │       └── filter/      # RateLimitFilter
+│   │       ├── controller/   # Auth, Billing, Webhook, LGPD, Manutencao,
+│   │       │                 #   Veiculo, Cliente, Documento, Meta,
+│   │       │                 #   FeatureFlag, Tenant, EmpresaConfig, Rastreio
+│   │       ├── dto/          # Records de request/response
+│   │       ├── exception/    # GlobalExceptionHandler (ProblemDetail RFC 7807)
+│   │       └── filter/       # RateLimitFilter
 │   └── src/main/resources/
-│       └── db/migration/    # Flyway V1–V8
+│       └── db/migration/     # Flyway V1–V8
 ├── frontend/
 │   └── src/app/
 │       ├── core/
-│       │   ├── guards/      # authGuard, consentGuard, subscriptionGuard,
-│       │   │                #   featureFlagGuard, roleGuard
-│       │   ├── interceptors/ # auth-refresh, credentials
-│       │   ├── models/      # lgpd.model, subscription.model, auth.model…
-│       │   ├── services/    # AuthService, LgpdService, SubscriptionService,
-│       │   │                #   TenantService, BillingService…
-│       │   └── validators/  # cnpj.validator
+│       │   ├── guards/       # auth, consent, subscription, featureFlag, role
+│       │   ├── interceptors/ # credentials, auth-refresh, error
+│       │   ├── models/       # auth, lgpd, subscription, feature-flag…
+│       │   ├── services/     # Auth, Lgpd, FeatureFlag, Subscription,
+│       │   │                 #   Manutencao, Veiculo, Documento, Meta…
+│       │   └── validators/   # cnpj.validator
 │       ├── features/
-│       │   ├── auth/        # LoginComponent, SignupComponent
-│       │   ├── billing/     # PricingComponent, BillingDashboardComponent
-│       │   ├── lgpd/        # ConsentComponent, PrivacyPolicyComponent,
-│       │   │                #   TermsOfUseComponent, LgpdPanelComponent
+│       │   ├── auth/         # Login, Signup
+│       │   ├── billing/      # Pricing (público), BillingDashboard
+│       │   ├── lgpd/         # Consent, PrivacyPolicy, TermsOfUse, LgpdPanel
 │       │   ├── dashboard/
 │       │   ├── manutencoes/
 │       │   ├── veiculos/
 │       │   ├── documentos/
-│       │   ├── metas/
-│       │   ├── admin/
-│       │   └── errors/
+│       │   ├── metas/        # Mecânico, Gerente, Detalhe
+│       │   ├── financeiro/
+│       │   ├── relatorios/
+│       │   ├── admin/        # FeatureFlags (toggle inline), Usuarios
+│       │   ├── rastreio/
+│       │   └── errors/       # 403
 │       └── shared/
 │           └── components/layout/  # ShellComponent (sidebar + topbar)
+├── scripts/
+│   └── set-env.js            # Injeta VITE_API_URL em environment.prod.ts no build
 └── docker-compose.yml
 ```
 
 ---
 
-## Licença
+## Licença e Direitos Autorais
 
-Proprietário — todos os direitos reservados © Manutex Tecnologia Ltda.
+```
+Copyright (c) 2025 RiseCode Studio
+Todos os direitos reservados.
+```
+
+Este software e todo o seu código-fonte, design, arquitetura e documentação são propriedade exclusiva da **RiseCode Studio** e estão protegidos pelas leis de direitos autorais do Brasil (Lei nº 9.610/1998) e pelos tratados internacionais de propriedade intelectual.
+
+**É expressamente proibido**, sem autorização prévia e por escrito da RiseCode Studio:
+
+- Copiar, reproduzir ou redistribuir o código-fonte, no todo ou em parte
+- Modificar, traduzir ou criar obras derivadas
+- Usar o software ou qualquer parte dele para fins comerciais sem licença
+- Fazer engenharia reversa, descompilar ou desmontar o software
+- Remover ou alterar avisos de direitos autorais, marcas ou atribuições
+
+**Contato para licenciamento:**
+[contato@risecode.studio](mailto:contato@risecode.studio)
+
+---
+
+<p align="center">
+  Desenvolvido com ♥ por <strong>RiseCode Studio</strong><br>
+  <a href="https://managerpitstop.com.br">managerpitstop.com.br</a>
+</p>

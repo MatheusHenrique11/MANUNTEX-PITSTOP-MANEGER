@@ -30,9 +30,10 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ManutencaoServiceTest {
 
-    @Mock ManutencaoRepository manutencaoRepository;
-    @Mock VeiculoRepository veiculoRepository;
-    @Mock UserRepository userRepository;
+    @Mock ManutencaoRepository    manutencaoRepository;
+    @Mock VeiculoRepository        veiculoRepository;
+    @Mock UserRepository           userRepository;
+    @Mock PlanEnforcementService   planEnforcement;
 
     @InjectMocks ManutencaoService service;
 
@@ -85,6 +86,8 @@ class ManutencaoServiceTest {
         ManutencaoRequest request = new ManutencaoRequest(
             veiculoId, mecanicoId, "Descrição do serviço com 10+ chars.", null, null, null, null, null, null
         );
+        // mecanico é buscado primeiro; veiculo falha depois
+        when(userRepository.findById(mecanicoId)).thenReturn(Optional.of(mecanico));
         when(veiculoRepository.findById(veiculoId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.criar(request))
@@ -97,7 +100,7 @@ class ManutencaoServiceTest {
         ManutencaoRequest request = new ManutencaoRequest(
             veiculoId, mecanicoId, "Descrição do serviço com 10+ chars.", null, null, null, null, null, null
         );
-        when(veiculoRepository.findById(veiculoId)).thenReturn(Optional.of(veiculo));
+        // mecanico é buscado primeiro; falha imediatamente
         when(userRepository.findById(mecanicoId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> service.criar(request))

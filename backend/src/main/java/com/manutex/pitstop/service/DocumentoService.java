@@ -11,6 +11,7 @@ import com.manutex.pitstop.web.dto.DocumentoResponse;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import com.manutex.pitstop.security.TenantContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,14 +37,15 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class DocumentoService {
 
-    private final DocumentoRepository documentoRepository;
-    private final VeiculoRepository veiculoRepository;
-    private final ClienteRepository clienteRepository;
-    private final UserRepository userRepository;
+    private final DocumentoRepository    documentoRepository;
+    private final VeiculoRepository      veiculoRepository;
+    private final ClienteRepository      clienteRepository;
+    private final UserRepository         userRepository;
     private final PdfMagicNumberValidator pdfValidator;
-    private final AesEncryptionService encryptionService;
-    private final ChecksumService checksumService;
-    private final StorageService storageService;
+    private final AesEncryptionService   encryptionService;
+    private final ChecksumService        checksumService;
+    private final StorageService         storageService;
+    private final PlanEnforcementService planEnforcement;
 
     /**
      * Realiza upload seguro de um documento PDF.
@@ -69,6 +71,11 @@ public class DocumentoService {
         } catch (IOException e) {
             throw new RuntimeException("Erro ao ler arquivo: " + e.getMessage(), e);
         }
+
+        // 2.1 Verifica quota de armazenamento do plano antes de prosseguir
+        TenantContext.currentEmpresaId().ifPresent(empresaId ->
+            planEnforcement.assertCanUploadDocument(empresaId, plainBytes.length)
+        );
 
         // 3. Checksum do conteúdo original (antes de criptografar)
         String checksum = checksumService.sha256Hex(plainBytes);

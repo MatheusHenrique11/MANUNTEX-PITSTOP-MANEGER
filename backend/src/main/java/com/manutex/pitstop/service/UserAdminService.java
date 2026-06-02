@@ -22,9 +22,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserAdminService {
 
-    private final UserRepository userRepository;
-    private final EmpresaRepository empresaRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final UserRepository         userRepository;
+    private final EmpresaRepository      empresaRepository;
+    private final PasswordEncoder        passwordEncoder;
+    private final PlanEnforcementService planEnforcement;
 
     @Transactional(readOnly = true)
     public List<UserResponse> listar(Authentication auth) {
@@ -55,6 +56,10 @@ public class UserAdminService {
             UUID empresaId = TenantContext.requireEmpresaId();
             empresa = empresaRepository.findById(empresaId)
                 .orElseThrow(() -> new EntityNotFoundException("Empresa não encontrada"));
+
+            if (request.role() == UserRole.ROLE_MECANICO) {
+                planEnforcement.assertCanAddMechanic(empresaId);
+            }
         }
 
         User user = User.builder()

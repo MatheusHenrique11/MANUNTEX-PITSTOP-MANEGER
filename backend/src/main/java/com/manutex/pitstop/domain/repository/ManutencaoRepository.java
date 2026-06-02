@@ -47,4 +47,16 @@ public interface ManutencaoRepository extends JpaRepository<Manutencao, UUID> {
         @Param("mes") int mes,
         @Param("ano") int ano
     );
+
+    @Query("""
+        SELECT COUNT(m) FROM Manutencao m
+        WHERE m.mecanico.empresa.id = :empresaId
+          AND EXTRACT(YEAR  FROM m.dataEntrada) = :ano
+          AND EXTRACT(MONTH FROM m.dataEntrada) = :mes
+        """)
+    long countByEmpresaAndMonth(
+        @Param("empresaId") UUID empresaId,
+        @Param("ano") int ano,
+        @Param("mes") int mes
+    );
 }

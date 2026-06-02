@@ -25,16 +25,22 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ManutencaoService {
 
-    private final ManutencaoRepository manutencaoRepository;
-    private final VeiculoRepository veiculoRepository;
-    private final UserRepository userRepository;
+    private final ManutencaoRepository    manutencaoRepository;
+    private final VeiculoRepository        veiculoRepository;
+    private final UserRepository           userRepository;
+    private final PlanEnforcementService   planEnforcement;
 
     @Transactional
     public ManutencaoResponse criar(ManutencaoRequest request) {
-        Veiculo veiculo = veiculoRepository.findById(request.veiculoId())
-            .orElseThrow(() -> new EntityNotFoundException("Veículo não encontrado: " + request.veiculoId()));
         User mecanico = userRepository.findById(request.mecanicoId())
             .orElseThrow(() -> new EntityNotFoundException("Mecânico não encontrado: " + request.mecanicoId()));
+
+        if (mecanico.getEmpresa() != null) {
+            planEnforcement.assertCanCreateOS(mecanico.getEmpresa().getId());
+        }
+
+        Veiculo veiculo = veiculoRepository.findById(request.veiculoId())
+            .orElseThrow(() -> new EntityNotFoundException("Veículo não encontrado: " + request.veiculoId()));
 
         Manutencao m = Manutencao.builder()
             .veiculo(veiculo)

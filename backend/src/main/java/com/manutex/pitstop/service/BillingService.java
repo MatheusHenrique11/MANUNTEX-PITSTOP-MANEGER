@@ -24,11 +24,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class BillingService {
 
-    private final EmpresaRepository empresaRepository;
-    private final AssinaturaRepository assinaturaRepository;
-    private final FaturaNfeRepository faturaNfeRepository;
+    private final EmpresaRepository     empresaRepository;
+    private final AssinaturaRepository  assinaturaRepository;
+    private final FaturaNfeRepository   faturaNfeRepository;
     private final PaymentGatewayService paymentGateway;
-    private final TaxInvoiceService taxInvoiceService;
+    private final TaxInvoiceService     taxInvoiceService;
+    private final PlanEnforcementService planEnforcement;
 
     @Value("${app.frontend-url:http://localhost:4200}")
     private String frontendUrl;
@@ -67,8 +68,12 @@ public class BillingService {
         if (customerId == null || customerId.isBlank()) {
             customerId = paymentGateway.createCustomer(empresa);
             empresa.setPaymentGatewayCustomerId(customerId);
-            empresaRepository.save(empresa);
         }
+
+        // Persiste o plano selecionado antes de redirecionar ao gateway.
+        // Se o pagamento falhar, subscriptionStatus permanece não-ACTIVE e o guard bloqueia acesso.
+        empresa.setSubscriptionPlan(plano);
+        empresaRepository.save(empresa);
 
         String successUrl = frontendUrl + "/billing/dashboard?success=true";
         String cancelUrl  = frontendUrl + "/billing/pricing?canceled=true";
@@ -122,9 +127,11 @@ public class BillingService {
         empresaRepository.save(empresa);
 
         atualizarOuCriarAssinatura(empresa, obj.subscription(), SubscriptionStatus.ACTIVE);
+        planEnforcement.activateFeaturesForPlan(empresa);
 
         taxInvoiceService.issueNfse(empresa, amount, gatewayInvoiceId);
-        log.info("Pagamento aprovado processado: empresa={} valor={}", empresa.getId(), amount);
+        log.info("Pagamento aprovado processado: empresa={} plano={} valor={}",
+            empresa.getId(), empresa.getSubscriptionPlan(), amount);
     }
 
     @Transactional

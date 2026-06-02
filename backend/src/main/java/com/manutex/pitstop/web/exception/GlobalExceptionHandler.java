@@ -10,6 +10,7 @@ import com.manutex.pitstop.service.DocumentoService;
 import com.manutex.pitstop.service.EmpresaConfigService;
 import com.manutex.pitstop.service.EmpresaService;
 import com.manutex.pitstop.service.ManutencaoService;
+import com.manutex.pitstop.service.PlanEnforcementService;
 import com.manutex.pitstop.service.UserAdminService;
 import com.manutex.pitstop.service.PdfMagicNumberValidator;
 import jakarta.persistence.EntityNotFoundException;
@@ -185,6 +186,16 @@ public class GlobalExceptionHandler {
         problem.setDetail(ex.getMessage());
         problem.setProperty("timestamp", Instant.now());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problem);
+    }
+
+    @ExceptionHandler(PlanEnforcementService.PlanLimitExceededException.class)
+    public ResponseEntity<ProblemDetail> handlePlanLimitExceeded(PlanEnforcementService.PlanLimitExceededException ex) {
+        ProblemDetail problem = ProblemDetail.forStatus(HttpStatus.PAYMENT_REQUIRED);
+        problem.setTitle("Limite do plano atingido");
+        problem.setDetail(ex.getMessage());
+        problem.setType(URI.create("https://pitstop.manutex.com/errors/plan-limit-exceeded"));
+        problem.setProperty("timestamp", Instant.now());
+        return ResponseEntity.status(HttpStatus.PAYMENT_REQUIRED).body(problem);
     }
 
     @ExceptionHandler(BillingService.SubscriptionRequiredException.class)
