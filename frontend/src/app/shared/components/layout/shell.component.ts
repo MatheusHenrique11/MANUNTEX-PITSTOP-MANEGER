@@ -37,15 +37,12 @@ interface NavItem {
         [class.translate-x-0]="sidebarOpen()">
 
         <!-- Logo -->
-        <div class="px-5 py-5 border-b border-surface-700 flex items-center gap-3">
-          <div class="w-9 h-9 bg-petroleum-700 rounded-lg flex items-center justify-center flex-shrink-0 shadow-glow-petroleum">
-            <svg viewBox="0 0 24 24" class="w-5 h-5 text-white fill-current">
-              <path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/>
-            </svg>
-          </div>
+        <div class="px-5 py-4 border-b border-surface-700 flex items-center gap-3">
+          <img src="assets/logo.png" alt="PitStop Manager"
+               class="w-9 h-9 object-contain flex-shrink-0" />
           <div>
             <p class="text-sm font-bold text-white leading-tight">PitStop</p>
-            <p class="text-xs text-slate-500 leading-tight">Manutex Manager</p>
+            <p class="text-xs text-slate-500 leading-tight">Manager</p>
           </div>
         </div>
 

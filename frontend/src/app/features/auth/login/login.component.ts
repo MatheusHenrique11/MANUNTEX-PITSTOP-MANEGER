@@ -27,13 +27,10 @@ import { AuthService } from '@core/services/auth.service';
 
         <!-- Logo -->
         <div class="relative z-10 flex items-center gap-3">
-          <div class="w-10 h-10 bg-petroleum-700 rounded-xl flex items-center justify-center shadow-glow-petroleum">
-            <svg viewBox="0 0 24 24" class="w-6 h-6 text-white fill-current">
-              <path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/>
-            </svg>
-          </div>
+          <img src="assets/logo.png" alt="PitStop Manager"
+               class="w-12 h-12 object-contain flex-shrink-0" />
           <div>
-            <p class="font-bold text-white text-lg leading-none">Manager PitStop</p>
+            <p class="font-bold text-white text-lg leading-none">PitStop Manager</p>
             <p class="text-xs text-slate-500">by RiseCode Studio</p>
           </div>
         </div>
@@ -71,12 +68,9 @@ import { AuthService } from '@core/services/auth.service';
 
           <!-- Mobile logo -->
           <div class="lg:hidden text-center">
-            <div class="w-12 h-12 bg-petroleum-700 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-glow-petroleum">
-              <svg viewBox="0 0 24 24" class="w-7 h-7 text-white fill-current">
-                <path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.4 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/>
-              </svg>
-            </div>
-            <h1 class="text-2xl font-bold text-white">Manager PitStop</h1>
+            <img src="assets/logo.png" alt="PitStop Manager"
+                 class="w-16 h-16 object-contain mx-auto mb-3" />
+            <h1 class="text-2xl font-bold text-white">PitStop Manager</h1>
           </div>
 
           <!-- Heading -->
