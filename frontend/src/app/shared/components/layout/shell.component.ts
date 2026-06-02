@@ -163,6 +163,7 @@ export class ShellComponent {
     { label: 'Financeiro',  path: '/financeiro',        icon: '💰', feature: 'FINANCIAL_MODULE' },
     { label: 'Relatórios',  path: '/relatorios',        icon: '📊', feature: 'ANALYTICS_DASHBOARD' },
     { label: 'Faturamento', path: '/billing/dashboard', icon: '🧾', roles: ['ROLE_ADMIN', 'ROLE_GERENTE'] },
+    { label: 'Uso do Plano', path: '/admin/uso',       icon: '📈', roles: ['ROLE_ADMIN', 'ROLE_GERENTE'] },
     { label: 'Usuários',    path: '/admin/usuarios',    icon: '👥', adminOnly: true },
     { label: 'Módulos',     path: '/admin/modulos',     icon: '⚙',  adminOnly: true },
   ];

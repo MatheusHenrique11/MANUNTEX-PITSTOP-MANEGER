@@ -20,6 +20,14 @@ public class BillingController {
 
     private final BillingService billingService;
 
+    /** Retorna uso atual de recursos e features do plano do tenant. */
+    @GetMapping("/plan-usage")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_GERENTE')")
+    public ResponseEntity<PlanUsageResponse> getPlanUsage() {
+        UUID empresaId = TenantContext.requireEmpresaId();
+        return ResponseEntity.ok(billingService.getPlanUsage(empresaId));
+    }
+
     /** Retorna a assinatura mais recente do tenant logado. */
     @GetMapping("/subscription")
     @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_GERENTE')")

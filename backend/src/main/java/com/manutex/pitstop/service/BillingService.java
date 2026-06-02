@@ -1,12 +1,18 @@
 package com.manutex.pitstop.service;
 
+import com.manutex.pitstop.config.AppFeatures;
 import com.manutex.pitstop.domain.entity.Assinatura;
 import com.manutex.pitstop.domain.entity.Empresa;
+import com.manutex.pitstop.domain.enums.PlanLimits;
 import com.manutex.pitstop.domain.enums.SubscriptionPlan;
 import com.manutex.pitstop.domain.enums.SubscriptionStatus;
+import com.manutex.pitstop.domain.enums.UserRole;
 import com.manutex.pitstop.domain.repository.AssinaturaRepository;
+import com.manutex.pitstop.domain.repository.DocumentoRepository;
 import com.manutex.pitstop.domain.repository.EmpresaRepository;
 import com.manutex.pitstop.domain.repository.FaturaNfeRepository;
+import com.manutex.pitstop.domain.repository.ManutencaoRepository;
+import com.manutex.pitstop.domain.repository.UserRepository;
 import com.manutex.pitstop.web.dto.*;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +22,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.YearMonth;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,17 +32,49 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class BillingService {
 
-    private final EmpresaRepository     empresaRepository;
-    private final AssinaturaRepository  assinaturaRepository;
-    private final FaturaNfeRepository   faturaNfeRepository;
-    private final PaymentGatewayService paymentGateway;
-    private final TaxInvoiceService     taxInvoiceService;
+    private final EmpresaRepository      empresaRepository;
+    private final AssinaturaRepository   assinaturaRepository;
+    private final FaturaNfeRepository    faturaNfeRepository;
+    private final ManutencaoRepository   manutencaoRepository;
+    private final DocumentoRepository    documentoRepository;
+    private final UserRepository         userRepository;
+    private final PaymentGatewayService  paymentGateway;
+    private final TaxInvoiceService      taxInvoiceService;
     private final PlanEnforcementService planEnforcement;
 
     @Value("${app.frontend-url:http://localhost:4200}")
     private String frontendUrl;
 
     // ── Consultas ────────────────────────────────────────────────────────────
+
+    @Transactional(readOnly = true)
+    public PlanUsageResponse getPlanUsage(UUID empresaId) {
+        Empresa empresa   = loadEmpresa(empresaId);
+        PlanLimits limits = PlanLimits.of(empresa.getSubscriptionPlan());
+        YearMonth  now    = YearMonth.now();
+
+        long osUsed       = manutencaoRepository.countByEmpresaAndMonth(empresaId, now.getYear(), now.getMonthValue());
+        long storageUsed  = documentoRepository.sumTamanhoBytesByEmpresaId(empresaId).orElse(0L);
+        long mecanicosUsed = userRepository.countByEmpresaIdAndRole(empresaId, UserRole.ROLE_MECANICO);
+
+        List<PlanUsageResponse.FeatureStatus> features = Arrays.stream(AppFeatures.values())
+            .map(f -> new PlanUsageResponse.FeatureStatus(
+                f.name(),
+                resolveLabel(f),
+                f.isActive(),
+                limits.getFeatures().contains(f)
+            ))
+            .toList();
+
+        return new PlanUsageResponse(
+            empresa.getSubscriptionPlan() != null ? empresa.getSubscriptionPlan() : SubscriptionPlan.STARTER,
+            empresa.getSubscriptionStatus(),
+            PlanUsageResponse.UsageMetric.of(osUsed,        limits.getMaxOsMensal()),
+            PlanUsageResponse.UsageMetric.of(mecanicosUsed, limits.getMaxMecanicos()),
+            PlanUsageResponse.StorageMetric.of(storageUsed, limits.getMaxStorageBytes()),
+            features
+        );
+    }
 
     @Transactional(readOnly = true)
     public AssinaturaResponse getAssinatura(UUID empresaId) {
@@ -156,6 +196,16 @@ public class BillingService {
     }
 
     // ── Helpers ──────────────────────────────────────────────────────────────
+
+    private String resolveLabel(AppFeatures feature) {
+        try {
+            var field = AppFeatures.class.getField(feature.name());
+            var label = field.getAnnotation(org.togglz.core.annotation.Label.class);
+            return label != null ? label.value() : feature.name();
+        } catch (NoSuchFieldException e) {
+            return feature.name();
+        }
+    }
 
     private Empresa loadEmpresa(UUID empresaId) {
         return empresaRepository.findById(empresaId)

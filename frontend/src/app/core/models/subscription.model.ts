@@ -46,3 +46,39 @@ export const STATUS_LABELS: Record<SubscriptionStatus, string> = {
 };
 
 export const ACTIVE_STATUSES: SubscriptionStatus[] = ['TRIAL', 'ACTIVE'];
+
+// ── Plan Usage ──────────────────────────────────────────────────────────────
+
+export interface UsageMetric {
+  used:      number;
+  limit:     number;
+  unlimited: boolean;
+}
+
+export interface StorageMetric {
+  usedBytes:  number;
+  limitBytes: number;
+  unlimited:  boolean;
+}
+
+export interface FeatureStatus {
+  name:           string;
+  label:          string;
+  active:         boolean;
+  includedInPlan: boolean;
+}
+
+export interface PlanUsageResponse {
+  plano:     SubscriptionPlan;
+  status:    SubscriptionStatus;
+  os:        UsageMetric;
+  mecanicos: UsageMetric;
+  storage:   StorageMetric;
+  features:  FeatureStatus[];
+}
+
+export const PLAN_PRICES: Record<SubscriptionPlan, string> = {
+  STARTER:      'R$ 89/mês',
+  PROFESSIONAL: 'R$ 179/mês',
+  ENTERPRISE:   'R$ 349/mês',
+};

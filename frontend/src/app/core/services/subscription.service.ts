@@ -7,6 +7,7 @@ import {
   CheckoutRequest,
   CheckoutResponse,
   FaturaNfeResponse,
+  PlanUsageResponse,
   SubscriptionPlan,
   SubscriptionStatus,
 } from '@core/models/subscription.model';
@@ -18,6 +19,10 @@ export class SubscriptionService {
 
   private readonly _status = signal<SubscriptionStatus | null>(null);
   readonly status = this._status.asReadonly();
+
+  getPlanUsage(): Observable<PlanUsageResponse> {
+    return this.http.get<PlanUsageResponse>(`${this.base}/plan-usage`);
+  }
 
   getAssinatura(): Observable<AssinaturaResponse> {
     return this.http.get<AssinaturaResponse>(`${this.base}/subscription`);

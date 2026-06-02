@@ -164,6 +164,16 @@ export const routes: Routes = [
             .then(m => m.FeatureFlagsComponent),
       },
 
+      // ── Admin: Uso do Plano ────────────────────────────────────
+      {
+        path: 'admin/uso',
+        canActivate: [roleGuard],
+        data: { roles: ['ROLE_ADMIN', 'ROLE_GERENTE'] },
+        loadComponent: () =>
+          import('./features/admin/plan-usage/plan-usage.component')
+            .then(m => m.PlanUsageComponent),
+      },
+
       // ── Módulo: Manutenções ───────────────────────────────────
       {
         path: 'manutencoes',

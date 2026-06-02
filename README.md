@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  Manager PitStop
+  Pitstop Manager
   <br>
 </h1>
 
