@@ -18,6 +18,14 @@ export const routes: Routes = [
       import('./features/auth/signup/signup.component').then(m => m.SignupComponent),
   },
 
+  // ── Billing público (sem autenticação) ───────────────────────────────────
+  {
+    path: 'billing/pricing',
+    loadComponent: () =>
+      import('./features/billing/pricing/pricing.component')
+        .then(m => m.PricingComponent),
+  },
+
   // ── LGPD — páginas públicas (sem autenticação) ────────────────────────────
   {
     path: 'politica-privacidade',

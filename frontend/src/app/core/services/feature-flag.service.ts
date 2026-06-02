@@ -20,6 +20,22 @@ export class FeatureFlagService {
     );
   }
 
+  toggle(name: FeatureName) {
+    return this.http.post<{ name: string; active: boolean; label: string }>(
+      `${this.apiUrl}/${name}/toggle`, {}
+    ).pipe(
+      tap(result => {
+        const current = this._flags();
+        if (current) {
+          this._flags.set({
+            ...current,
+            [result.name]: { active: result.active, label: result.label },
+          });
+        }
+      })
+    );
+  }
+
   isActive(feature: FeatureName): boolean {
     return this._flags()?.[feature]?.active ?? false;
   }

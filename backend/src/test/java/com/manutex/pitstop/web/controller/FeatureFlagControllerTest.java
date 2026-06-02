@@ -41,6 +41,7 @@ class FeatureFlagControllerTest {
 
     @MockBean JwtAuthenticationFilter jwtAuthenticationFilter;
     @MockBean RateLimitFilter rateLimitFilter;
+    @MockBean FeatureManager featureManager;
 
     @BeforeEach
     void configureMockFilters() throws Exception {

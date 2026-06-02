@@ -162,6 +162,7 @@ public class AuthService {
     private Map<String, Object> buildClaims(User user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("roles", user.getAuthorities().stream().map(a -> a.getAuthority()).toList());
+        claims.put("userId", user.getId().toString());
         if (user.getEmpresa() != null) {
             claims.put("empresaId", user.getEmpresa().getId().toString());
         }

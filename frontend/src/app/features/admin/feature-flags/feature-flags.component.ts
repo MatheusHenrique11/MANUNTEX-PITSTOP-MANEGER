@@ -18,7 +18,7 @@ interface FeatureFlagRow {
 
       <!-- Header -->
       <div class="mb-8">
-        <h1 class="text-2xl font-bold text-gray-900">⚙️ Controle de Módulos</h1>
+        <h1 class="text-2xl font-bold text-gray-900">Controle de Módulos</h1>
         <p class="mt-1 text-sm text-gray-500">
           Ative ou desative funcionalidades em tempo real sem necessidade de deploy.
           As mudanças são aplicadas imediatamente para todos os usuários.
@@ -65,29 +65,24 @@ interface FeatureFlagRow {
                     }
                   </td>
                   <td class="px-6 py-4 text-center">
-                    <a
-                      href="/admin/toggles"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="text-xs text-brand-600 hover:text-brand-800 font-medium underline">
-                      Gerenciar no Togglz →
-                    </a>
+                    <button
+                      (click)="toggle(flag)"
+                      [disabled]="toggling() === flag.name"
+                      class="text-xs font-medium px-3 py-1.5 rounded border transition-colors disabled:opacity-50"
+                      [class]="flag.active
+                        ? 'border-red-300 text-red-600 hover:bg-red-50'
+                        : 'border-green-300 text-green-600 hover:bg-green-50'">
+                      @if (toggling() === flag.name) {
+                        Salvando...
+                      } @else {
+                        {{ flag.active ? 'Desativar' : 'Ativar' }}
+                      }
+                    </button>
                   </td>
                 </tr>
               }
             </tbody>
           </table>
-        </div>
-
-        <!-- Aviso -->
-        <div class="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-          <p class="text-sm text-amber-800">
-            <strong>Painel Togglz:</strong> Para ativar ou desativar módulos, acesse
-            <a href="/admin/toggles" target="_blank" class="underline font-medium">
-              /admin/toggles
-            </a>.
-            Apenas administradores têm acesso. As mudanças refletem imediatamente via cache invalidation.
-          </p>
         </div>
       }
 
@@ -99,16 +94,33 @@ export class FeatureFlagsComponent implements OnInit {
 
   readonly loading = signal(true);
   readonly flags = signal<FeatureFlagRow[]>([]);
+  readonly toggling = signal<FeatureName | null>(null);
 
   ngOnInit() {
     this.featureFlagService.load().subscribe({
       next: (flagsMap: FeatureFlagsMap) => {
-        const rows: FeatureFlagRow[] = (Object.entries(flagsMap) as [FeatureName, { active: boolean; label: string }][])
-          .map(([name, data]) => ({ name, label: data.label, active: data.active }));
-        this.flags.set(rows);
+        this.flags.set(this.toRows(flagsMap));
         this.loading.set(false);
       },
       error: () => this.loading.set(false),
     });
+  }
+
+  toggle(flag: FeatureFlagRow) {
+    this.toggling.set(flag.name);
+    this.featureFlagService.toggle(flag.name).subscribe({
+      next: (result) => {
+        this.flags.update(rows =>
+          rows.map(r => r.name === flag.name ? { ...r, active: result.active } : r)
+        );
+        this.toggling.set(null);
+      },
+      error: () => this.toggling.set(null),
+    });
+  }
+
+  private toRows(flagsMap: FeatureFlagsMap): FeatureFlagRow[] {
+    return (Object.entries(flagsMap) as [FeatureName, { active: boolean; label: string }][])
+      .map(([name, data]) => ({ name, label: data.label, active: data.active }));
   }
 }

@@ -4,22 +4,28 @@ import com.manutex.pitstop.config.AppFeatures;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.togglz.core.annotation.Label;
+import org.togglz.core.manager.FeatureManager;
+import org.togglz.core.repository.FeatureState;
 
 import java.lang.reflect.Field;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Expõe o estado das Feature Flags para o Angular.
- * GET /api/v1/features — qualquer usuário autenticado consulta quais módulos estão ativos.
+ * Expõe e gerencia o estado das Feature Flags para o Angular.
+ * GET  /api/v1/features         — qualquer usuário autenticado consulta quais módulos estão ativos.
+ * POST /api/v1/features/{name}/toggle — apenas ROLE_ADMIN pode ativar/desativar módulos.
  */
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/features")
 @RequiredArgsConstructor
 public class FeatureFlagController {
+
+    private final FeatureManager featureManager;
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> listFeatures() {
@@ -33,6 +39,25 @@ public class FeatureFlagController {
         return ResponseEntity.ok(features);
     }
 
+    @PostMapping("/{name}/toggle")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public ResponseEntity<Map<String, Object>> toggleFeature(@PathVariable String name) {
+        AppFeatures feature;
+        try {
+            feature = AppFeatures.valueOf(name.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+        boolean newState = !featureManager.isActive(feature);
+        featureManager.setFeatureState(new FeatureState(feature, newState));
+        log.info("Feature flag '{}' alterada para: {}", feature.name(), newState);
+        return ResponseEntity.ok(Map.of(
+            "name", feature.name(),
+            "active", newState,
+            "label", resolveLabel(feature)
+        ));
+    }
+
     private String resolveLabel(AppFeatures feature) {
         try {
             Field field = AppFeatures.class.getField(feature.name());
@@ -43,7 +68,4 @@ public class FeatureFlagController {
             return feature.name();
         }
     }
-
-    // O toggle real é feito via painel Togglz em /admin/toggles
-    // Este endpoint apenas lê o estado para o Angular renderizar o menu
 }

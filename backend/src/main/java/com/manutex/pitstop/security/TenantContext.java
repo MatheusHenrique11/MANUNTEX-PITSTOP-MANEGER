@@ -25,9 +25,9 @@ public final class TenantContext {
     }
 
     public static UUID requireUserId(Authentication auth) {
-        if (auth != null && auth.getPrincipal() instanceof User user) {
-            return user.getId();
+        if (auth != null && auth.getDetails() instanceof TenantDetails td && td.userId() != null) {
+            return td.userId();
         }
-        throw new IllegalStateException("Usuário não autenticado ou principal inválido");
+        throw new IllegalStateException("userId ausente no contexto de segurança — token sem claim 'userId'");
     }
 }

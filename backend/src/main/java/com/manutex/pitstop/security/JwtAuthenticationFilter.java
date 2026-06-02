@@ -53,8 +53,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String empresaIdStr = claims.get("empresaId", String.class);
                 UUID empresaId = empresaIdStr != null ? UUID.fromString(empresaIdStr) : null;
 
+                String userIdStr = claims.get("userId", String.class);
+                UUID userId = userIdStr != null ? UUID.fromString(userIdStr) : null;
+
                 var auth = new UsernamePasswordAuthenticationToken(subject, null, authorities);
-                auth.setDetails(new TenantDetails(request.getRemoteAddr(), empresaId));
+                auth.setDetails(new TenantDetails(request.getRemoteAddr(), empresaId, userId));
                 SecurityContextHolder.getContext().setAuthentication(auth);
 
             } catch (InvalidTokenException e) {

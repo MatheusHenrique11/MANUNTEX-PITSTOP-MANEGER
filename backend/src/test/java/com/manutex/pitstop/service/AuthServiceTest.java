@@ -40,6 +40,7 @@ class AuthServiceTest {
     @BeforeEach
     void setUp() {
         adminUser = User.builder()
+            .id(UUID.randomUUID())
             .email("admin@pitstop.com")
             .passwordHash("$2b$12$hash")
             .fullName("Admin")
