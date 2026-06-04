@@ -19,16 +19,13 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Implementação do TaxInvoiceService usando a API Focus NFe (homologação/produção).
- *
- * Documentação: https://focusnfe.com.br/doc/
- *
- * Enquanto FOCUS_NFE_TOKEN não for configurado, opera em modo mock para
- * não bloquear o desenvolvimento local.
+ * @deprecated Substituído por {@link SaaSInvoiceService} (prestador correto: RiseCode Studio)
+ * e {@link WorkshopInvoiceService} (prestador: oficina tenant).
+ * Esta classe foi mantida apenas como referência histórica e não é mais registrada como @Service.
  */
 @Slf4j
-@Service
-public class FocusNfeService implements TaxInvoiceService {
+@Deprecated(since = "V10", forRemoval = true)
+public class FocusNfeService {
 
     private static final String NFSE_PATH = "/v2/nfse";
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
@@ -55,7 +52,6 @@ public class FocusNfeService implements TaxInvoiceService {
         this.faturaNfeRepository = faturaNfeRepository;
     }
 
-    @Override
     public FaturaNfe issueNfse(Empresa empresa, BigDecimal amount, String gatewayInvoiceId) {
         // Idempotência: não emite se já existe fatura para este invoiceId
         if (gatewayInvoiceId != null && faturaNfeRepository.existsByGatewayInvoiceId(gatewayInvoiceId)) {

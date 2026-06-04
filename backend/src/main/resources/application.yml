@@ -44,6 +44,15 @@ spring:
     caffeine:
       spec: maximumSize=1000,expireAfterWrite=300s
 
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
 app:
   jwt:
     secret: ${JWT_SECRET}
@@ -77,14 +86,32 @@ app:
 
   frontend-url: ${FRONTEND_URL:http://localhost:4200}
 
+  notification:
+    whatsapp:
+      enabled: ${WHATSAPP_ENABLED:false}
+    email:
+      enabled: ${MAIL_ENABLED:false}
+    document-expiry-alert-days: 7
+
 billing:
   stripe:
     secret-key: ${STRIPE_SECRET_KEY:}
     webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+    price-starter: ${STRIPE_PRICE_STARTER:}
+    price-professional: ${STRIPE_PRICE_PROFESSIONAL:}
+    price-enterprise: ${STRIPE_PRICE_ENTERPRISE:}
   nfe:
     api-url: ${FOCUS_NFE_API_URL:https://homologacao.focusnfe.com.br}
     api-token: ${FOCUS_NFE_TOKEN:}
     municipio-prestador: ${NFE_MUNICIPIO_PRESTADOR:3550308}
+  platform-fiscal:
+    cnpj: ${PLATFORM_FISCAL_CNPJ:}
+    razao-social: ${PLATFORM_FISCAL_RAZAO_SOCIAL:RiseCode Studio}
+    inscricao-municipal: ${PLATFORM_FISCAL_INSCRICAO_MUNICIPAL:}
+    codigo-municipio: ${PLATFORM_FISCAL_CODIGO_MUNICIPIO:${NFE_MUNICIPIO_PRESTADOR:3550308}}
+    codigo-servico-municipal: ${PLATFORM_FISCAL_CODIGO_SERVICO:}
+    item-lista-servico: ${PLATFORM_FISCAL_ITEM_LISTA_SERVICO:1.01}
+    aliquota-iss: ${PLATFORM_FISCAL_ALIQUOTA_ISS:2.00}
 
 management:
   endpoints:

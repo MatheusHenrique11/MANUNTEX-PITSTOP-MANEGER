@@ -10,9 +10,11 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.security.spec.KeySpec;
 import java.util.Arrays;
+import java.util.Base64;
 
 /**
  * Serviço de criptografia AES-256-GCM para documentos sensíveis.
@@ -112,6 +114,25 @@ public class AesEncryptionService {
         } catch (Exception e) {
             throw new IllegalStateException("Falha ao derivar chave de criptografia", e);
         }
+    }
+
+    /**
+     * Cifra uma string UTF-8 e retorna o resultado em Base64.
+     * Útil para armazenar credenciais em banco (ex: API tokens de notificação).
+     */
+    public String encryptToBase64(String plaintext) {
+        if (plaintext == null || plaintext.isBlank()) return null;
+        return Base64.getEncoder().encodeToString(
+            encrypt(plaintext.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    /**
+     * Decifra um valor Base64 previamente cifrado por {@link #encryptToBase64}.
+     * Retorna null se o valor for nulo ou vazio.
+     */
+    public String decryptFromBase64(String cipherBase64) {
+        if (cipherBase64 == null || cipherBase64.isBlank()) return null;
+        return new String(decrypt(Base64.getDecoder().decode(cipherBase64)), StandardCharsets.UTF_8);
     }
 
     public static class EncryptionException extends RuntimeException {

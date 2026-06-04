@@ -154,6 +154,33 @@ export const routes: Routes = [
             .then(m => m.UsuariosComponent),
       },
 
+      // ── Admin: Notificações ────────────────────────────────────
+      {
+        path: 'admin/notificacoes/templates',
+        canActivate: [roleGuard],
+        data: { roles: ['ROLE_ADMIN', 'ROLE_GERENTE'] },
+        loadComponent: () =>
+          import('./features/admin/notificacoes/notification-templates.component')
+            .then(m => m.NotificationTemplatesComponent),
+      },
+      {
+        path: 'admin/notificacoes/config',
+        canActivate: [roleGuard],
+        data: { roles: ['ROLE_ADMIN'] },
+        loadComponent: () =>
+          import('./features/admin/notificacoes/notification-config.component')
+            .then(m => m.NotificationConfigComponent),
+      },
+      {
+        path: 'admin/notificacoes/logs',
+        canActivate: [roleGuard],
+        data: { roles: ['ROLE_ADMIN', 'ROLE_GERENTE'] },
+        loadComponent: () =>
+          import('./features/admin/notificacoes/notification-logs.component')
+            .then(m => m.NotificationLogsComponent),
+      },
+      { path: 'admin/notificacoes', redirectTo: 'admin/notificacoes/templates', pathMatch: 'full' },
+
       // ── Admin: Controle de Módulos (Feature Flags) ─────────────
       {
         path: 'admin/modulos',
@@ -172,6 +199,26 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/admin/plan-usage/plan-usage.component')
             .then(m => m.PlanUsageComponent),
+      },
+
+      // ── Admin: Configuração Fiscal da Plataforma (RiseCode Studio) ──────
+      {
+        path: 'admin/fiscal/platform',
+        canActivate: [roleGuard],
+        data: { roles: ['ROLE_ADMIN'] },
+        loadComponent: () =>
+          import('./features/admin/fiscal/platform-fiscal-status.component')
+            .then(m => m.PlatformFiscalStatusComponent),
+      },
+
+      // ── Fiscal: Configuração da Oficina (tenant) ──────────────
+      {
+        path: 'fiscal/config',
+        canActivate: [roleGuard],
+        data: { roles: ['ROLE_ADMIN', 'ROLE_GERENTE'] },
+        loadComponent: () =>
+          import('./features/fiscal/tenant-fiscal-config.component')
+            .then(m => m.TenantFiscalConfigComponent),
       },
 
       // ── Módulo: Manutenções ───────────────────────────────────

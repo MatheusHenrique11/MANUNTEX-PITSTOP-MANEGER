@@ -14,7 +14,7 @@ Deploy cirúrgico do backend na mesma VPS do RiggingCheck, sem derrubar nenhum s
 | Banco (prod) | PostgreSQL 15 — container `risecode_postgres` |
 | Banco (dev) | `pitstop_dev` (docker-compose.yml local) |
 | Porta interna | **8080** |
-| Flyway | 8 migrações (V1–V8) |
+| Flyway | 10 migrações (V1–V10) |
 | Storage | AWS S3 / Cloudflare R2 (MinIO só em dev) |
 
 ---
@@ -171,7 +171,19 @@ Aguardar a linha:
 Started PitstopBackendApplication in X.XXX seconds
 ```
 
-O Flyway executará as 8 migrações automaticamente no primeiro boot.
+O Flyway executará as 10 migrações (V1–V10) automaticamente no primeiro boot.
+Verifique também os avisos do `ProductionReadinessValidator`:
+
+```
+# OK — pronto para produção:
+[PITSTOP] Validação de produção: todas as configurações OK.
+
+# Aviso — algo faltando (não impede o start):
+⚠  STRIPE_WEBHOOK_SECRET ausente — webhook aceita sem validação...
+
+# Erro fatal — impede o start:
+✗  FOCUS_NFE_TOKEN de produção configurado mas CNPJ da RiseCode Studio ausente.
+```
 
 ---
 
@@ -203,14 +215,20 @@ curl -I https://managerpitstop.com.br
 
 ## Passo 9 — Configurar o Frontend na Vercel
 
-No painel da Vercel, adicionar as variáveis de ambiente do projeto Manager PitStop:
+O Angular usa `environment.prod.ts` com a `apiUrl` hardcoded — **não são necessárias variáveis de ambiente no painel da Vercel** para o funcionamento básico.
 
-| Variável | Valor |
-|----------|-------|
-| `VITE_API_URL` | `https://api.managerpitstop.com.br/api` |
-| `VITE_FRONTEND_URL` | `https://managerpitstop.com.br` |
+A URL da API já está definida em [frontend/src/environments/environment.prod.ts](frontend/src/environments/environment.prod.ts):
+```ts
+apiUrl: 'https://api.managerpitstop.com.br/api/v1'
+```
 
-Após salvar, fazer redeploy do frontend.
+Se precisar alterar o domínio da API sem fazer commit, configure via Vercel Dashboard:
+
+| Variável | Quando usar |
+|----------|-------------|
+| _(nenhuma obrigatória)_ | O build usa `environment.prod.ts` diretamente |
+
+Após qualquer mudança no frontend, o Vercel faz redeploy automático via git push para `main`.
 
 ---
 
@@ -272,7 +290,7 @@ Arquivos **não alterados**: `docker-compose.yml` (dev), `backend/Dockerfile`, `
 - [ ] `managerpitstop_backend` responde em `http://localhost:8080/actuator/health`
 - [ ] `https://api.managerpitstop.com.br/actuator/health` retorna `{"status":"UP"}`
 - [ ] Certificado Let's Encrypt emitido (HTTPS sem aviso)
-- [ ] Flyway executou as 8 migrações sem erro
+- [ ] Flyway executou as 10 migrações (V1–V10) sem erro
 - [ ] Banco `managerpitstop_db` conectado e isolado do RiggingCheck
 - [ ] CORS permite `https://managerpitstop.com.br`
 - [ ] Frontend na Vercel consegue chamar a API (login funcional)

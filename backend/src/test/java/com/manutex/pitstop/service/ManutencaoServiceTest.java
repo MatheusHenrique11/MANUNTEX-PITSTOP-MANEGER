@@ -1,6 +1,7 @@
 package com.manutex.pitstop.service;
 
 import com.manutex.pitstop.domain.entity.*;
+import com.manutex.pitstop.domain.enums.NotificationEvent;
 import com.manutex.pitstop.domain.enums.StatusManutencao;
 import com.manutex.pitstop.domain.enums.UserRole;
 import com.manutex.pitstop.domain.repository.ManutencaoRepository;
@@ -12,9 +13,11 @@ import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
@@ -30,10 +33,11 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class ManutencaoServiceTest {
 
-    @Mock ManutencaoRepository    manutencaoRepository;
-    @Mock VeiculoRepository        veiculoRepository;
-    @Mock UserRepository           userRepository;
-    @Mock PlanEnforcementService   planEnforcement;
+    @Mock ManutencaoRepository       manutencaoRepository;
+    @Mock VeiculoRepository          veiculoRepository;
+    @Mock UserRepository             userRepository;
+    @Mock PlanEnforcementService     planEnforcement;
+    @Mock ApplicationEventPublisher  eventPublisher;
 
     @InjectMocks ManutencaoService service;
 
@@ -79,6 +83,9 @@ class ManutencaoServiceTest {
         assertThat(response.veiculoPlaca()).isEqualTo("ABC1234");
         assertThat(response.mecanicoNome()).isEqualTo("Carlos Mecânico");
         assertThat(response.clienteNome()).isEqualTo("João Silva");
+
+        // Verifica que o evento de notificação foi publicado
+        verify(eventPublisher).publishEvent(any(OsNotificationEvent.class));
     }
 
     @Test
@@ -141,6 +148,11 @@ class ManutencaoServiceTest {
 
         var response = service.alterarStatus(UUID.randomUUID(), StatusManutencao.EM_ANDAMENTO);
         assertThat(response.status()).isEqualTo(StatusManutencao.EM_ANDAMENTO);
+
+        // Verifica que evento de notificação foi publicado com tipo correto
+        ArgumentCaptor<OsNotificationEvent> captor = ArgumentCaptor.forClass(OsNotificationEvent.class);
+        verify(eventPublisher).publishEvent(captor.capture());
+        assertThat(captor.getValue().evento()).isEqualTo(NotificationEvent.OS_EM_ANDAMENTO);
     }
 
     @Test
@@ -169,6 +181,11 @@ class ManutencaoServiceTest {
 
         var response = service.alterarStatus(UUID.randomUUID(), StatusManutencao.CONCLUIDA);
         assertThat(response.status()).isEqualTo(StatusManutencao.CONCLUIDA);
+
+        // OS concluída deve publicar evento OS_CONCLUIDA
+        ArgumentCaptor<OsNotificationEvent> captor = ArgumentCaptor.forClass(OsNotificationEvent.class);
+        verify(eventPublisher).publishEvent(captor.capture());
+        assertThat(captor.getValue().evento()).isEqualTo(NotificationEvent.OS_CONCLUIDA);
     }
 
     @Test

@@ -77,6 +77,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/v1/lgpd/consent").authenticated()
                 .requestMatchers("/actuator/health").permitAll()
                 .requestMatchers("/admin/toggles/**").hasRole("ADMIN")
+                .requestMatchers("/api/v1/notifications/**").authenticated()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)

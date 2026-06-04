@@ -3,6 +3,7 @@ package com.manutex.pitstop.service;
 import com.manutex.pitstop.domain.entity.Manutencao;
 import com.manutex.pitstop.domain.entity.User;
 import com.manutex.pitstop.domain.entity.Veiculo;
+import com.manutex.pitstop.domain.enums.NotificationEvent;
 import com.manutex.pitstop.domain.enums.StatusManutencao;
 import com.manutex.pitstop.domain.repository.ManutencaoRepository;
 import com.manutex.pitstop.domain.repository.UserRepository;
@@ -13,6 +14,7 @@ import com.manutex.pitstop.web.dto.ManutencaoUpdateRequest;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,7 @@ public class ManutencaoService {
     private final VeiculoRepository        veiculoRepository;
     private final UserRepository           userRepository;
     private final PlanEnforcementService   planEnforcement;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public ManutencaoResponse criar(ManutencaoRequest request) {
@@ -56,6 +59,7 @@ public class ManutencaoService {
 
         Manutencao saved = manutencaoRepository.save(m);
         log.info("OS criada: id={}, veiculo={}, mecanico={}", saved.getId(), veiculo.getPlaca(), mecanico.getFullName());
+        eventPublisher.publishEvent(buildEvent(saved, NotificationEvent.OS_CRIADA));
         return ManutencaoResponse.of(saved);
     }
 
@@ -94,7 +98,9 @@ public class ManutencaoService {
 
         m.setStatus(novoStatus);
         log.info("OS {} status alterado para {}", id, novoStatus);
-        return ManutencaoResponse.of(manutencaoRepository.save(m));
+        Manutencao saved = manutencaoRepository.save(m);
+        statusToEvent(novoStatus).ifPresent(ev -> eventPublisher.publishEvent(buildEvent(saved, ev)));
+        return ManutencaoResponse.of(saved);
     }
 
     @Transactional(readOnly = true)
@@ -139,6 +145,37 @@ public class ManutencaoService {
 
     private boolean isTerminal(StatusManutencao status) {
         return status == StatusManutencao.CONCLUIDA || status == StatusManutencao.CANCELADA;
+    }
+
+    private OsNotificationEvent buildEvent(Manutencao m, NotificationEvent tipo) {
+        var veiculo = m.getVeiculo();
+        var cliente = veiculo != null ? veiculo.getCliente() : null;
+        var empresa = m.getMecanico() != null ? m.getMecanico().getEmpresa() : null;
+        String link = empresa != null
+            ? "https://managerpitstop.com.br/rastreio/" + m.getTrackingToken()
+            : null;
+        return new OsNotificationEvent(
+            empresa  != null ? empresa.getId()         : null,
+            m.getId(),
+            cliente  != null ? cliente.getId()         : null,
+            cliente  != null ? cliente.getTelefone()   : null,
+            cliente  != null ? cliente.getEmail()      : null,
+            cliente  != null ? cliente.getNome()       : null,
+            veiculo  != null ? veiculo.getPlaca()      : null,
+            veiculo  != null ? veiculo.getModelo()     : null,
+            link,
+            tipo
+        );
+    }
+
+    private java.util.Optional<NotificationEvent> statusToEvent(StatusManutencao s) {
+        return java.util.Optional.ofNullable(switch (s) {
+            case EM_ANDAMENTO    -> NotificationEvent.OS_EM_ANDAMENTO;
+            case AGUARDANDO_PECAS-> NotificationEvent.OS_AGUARDANDO_PECAS;
+            case CONCLUIDA       -> NotificationEvent.OS_CONCLUIDA;
+            case CANCELADA       -> NotificationEvent.OS_CANCELADA;
+            default              -> null;
+        });
     }
 
     public static class StatusTransitionException extends RuntimeException {

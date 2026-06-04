@@ -4,6 +4,7 @@ import com.manutex.pitstop.domain.entity.*;
 import com.manutex.pitstop.domain.enums.ConsentType;
 import com.manutex.pitstop.domain.enums.DsarStatus;
 import com.manutex.pitstop.domain.repository.*;
+import com.manutex.pitstop.domain.repository.NotificationLogRepository;
 import com.manutex.pitstop.security.TenantContext;
 import com.manutex.pitstop.web.dto.*;
 import jakarta.persistence.EntityNotFoundException;
@@ -39,13 +40,14 @@ public class LgpdService {
     // Prazo de resposta às solicitações do titular (Art. 18 §4 — prazo razoável)
     private static final int DSAR_DEADLINE_DAYS = 15;
 
-    private final UserRepository              userRepository;
-    private final UserConsentRepository       userConsentRepository;
+    private final UserRepository               userRepository;
+    private final UserConsentRepository        userConsentRepository;
     private final DataSubjectRequestRepository dsarRepository;
-    private final AuditLogRepository          auditLogRepository;
-    private final RefreshTokenRepository      refreshTokenRepository;
-    private final EmpresaRepository           empresaRepository;
-    private final PasswordEncoder             passwordEncoder;
+    private final AuditLogRepository           auditLogRepository;
+    private final RefreshTokenRepository       refreshTokenRepository;
+    private final EmpresaRepository            empresaRepository;
+    private final PasswordEncoder              passwordEncoder;
+    private final NotificationLogRepository    notificationLogRepository;
 
     // ── Consentimento ─────────────────────────────────────────────────────────
 
@@ -241,6 +243,10 @@ public class LgpdService {
         // Revoga todos os tokens de sessão
         refreshTokenRepository.revokeAllByUserId(userId);
 
+        // Nota: NotificationLog.clienteId referencia Cliente (cliente da oficina), não User.
+        // A anonimização de User (mecânicos, gerentes) não tem clienteId correspondente.
+        // A limpeza de logs por clienteId ocorre em softDeleteCliente(), não aqui.
+
         userRepository.save(user);
 
         auditLogRepository.save(AuditLog.builder()
@@ -258,13 +264,16 @@ public class LgpdService {
     @Transactional
     @SuppressWarnings("null")
     public void softDeleteCliente(UUID clienteId, Authentication auth, UUID empresaId) {
+        // LGPD: apaga logs de notificação com telefone/e-mail do cliente sendo removido
+        notificationLogRepository.deleteByClienteId(clienteId);
+
         auditLogRepository.save(AuditLog.builder()
             .empresaId(empresaId)
             .userEmail(auth.getName())
             .action("SOFT_DELETE")
             .resourceType("CLIENTE")
             .resourceId(clienteId.toString())
-            .detail("Exclusão lógica via LGPD")
+            .detail("Exclusão lógica via LGPD + notification_logs removidos")
             .build());
     }
 

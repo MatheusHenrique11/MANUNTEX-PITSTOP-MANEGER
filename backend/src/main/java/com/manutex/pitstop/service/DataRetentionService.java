@@ -3,6 +3,7 @@ package com.manutex.pitstop.service;
 import com.manutex.pitstop.domain.entity.AuditLog;
 import com.manutex.pitstop.domain.repository.AuditLogRepository;
 import com.manutex.pitstop.domain.repository.ClienteRepository;
+import com.manutex.pitstop.domain.repository.NotificationLogRepository;
 import com.manutex.pitstop.domain.repository.RefreshTokenRepository;
 import com.manutex.pitstop.domain.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -28,10 +29,11 @@ public class DataRetentionService {
 
     private static final int HARD_DELETE_AFTER_DAYS = 90;
 
-    private final UserRepository         userRepository;
-    private final ClienteRepository      clienteRepository;
-    private final RefreshTokenRepository refreshTokenRepository;
-    private final AuditLogRepository     auditLogRepository;
+    private final UserRepository            userRepository;
+    private final ClienteRepository         clienteRepository;
+    private final RefreshTokenRepository    refreshTokenRepository;
+    private final AuditLogRepository        auditLogRepository;
+    private final NotificationLogRepository notificationLogRepository;
 
     @Scheduled(cron = "0 0 3 * * ?")
     @Transactional
@@ -44,10 +46,11 @@ public class DataRetentionService {
         int deletedUsers    = userRepository.hardDeleteAnonymized(cutoff);
         int deletedClientes = clienteRepository.hardDeleteAnonymized(cutoff);
         int deletedTokens   = refreshTokenRepository.deleteExpiredAndRevoked(now);
+        int deletedNotifLogs = notificationLogRepository.deleteOlderThan(cutoff);
 
         String detail = String.format(
-            "users=%d, clientes=%d, tokens=%d (cutoff=%s)",
-            deletedUsers, deletedClientes, deletedTokens, cutoff
+            "users=%d, clientes=%d, tokens=%d, notif_logs=%d (cutoff=%s)",
+            deletedUsers, deletedClientes, deletedTokens, deletedNotifLogs, cutoff
         );
 
         auditLogRepository.save(AuditLog.builder()

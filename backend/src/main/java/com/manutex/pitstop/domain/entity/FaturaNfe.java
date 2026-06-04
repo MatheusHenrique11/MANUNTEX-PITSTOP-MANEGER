@@ -1,5 +1,6 @@
 package com.manutex.pitstop.domain.entity;
 
+import com.manutex.pitstop.domain.enums.InvoiceType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -44,6 +45,11 @@ public class FaturaNfe {
 
     @Column(name = "xml_url", columnDefinition = "TEXT")
     private String xmlUrl;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "invoice_type", nullable = false, length = 20)
+    @Builder.Default
+    private InvoiceType invoiceType = InvoiceType.SAAS;
 
     @CreationTimestamp
     @Column(name = "issue_date", nullable = false, updatable = false)

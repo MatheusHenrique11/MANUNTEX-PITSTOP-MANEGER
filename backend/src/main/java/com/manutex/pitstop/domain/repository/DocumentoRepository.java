@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -24,4 +25,17 @@ public interface DocumentoRepository extends JpaRepository<Documento, UUID> {
         WHERE d.uploadedBy.empresa.id = :empresaId
         """)
     Optional<Long> sumTamanhoBytesByEmpresaId(@Param("empresaId") UUID empresaId);
+
+    /** Documentos com expiresAt entre agora e o limite — para alertas de vencimento. */
+    @Query("""
+        SELECT d FROM Documento d
+        WHERE d.expiresAt IS NOT NULL
+          AND d.expiresAt > :agora
+          AND d.expiresAt <= :limite
+        ORDER BY d.expiresAt ASC
+        """)
+    List<Documento> findVencendoEntre(
+        @Param("agora")  Instant agora,
+        @Param("limite") Instant limite
+    );
 }

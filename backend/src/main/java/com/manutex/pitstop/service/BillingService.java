@@ -1,13 +1,16 @@
 package com.manutex.pitstop.service;
 
 import com.manutex.pitstop.config.AppFeatures;
+import com.manutex.pitstop.domain.entity.AuditLog;
 import com.manutex.pitstop.domain.entity.Assinatura;
 import com.manutex.pitstop.domain.entity.Empresa;
+import com.manutex.pitstop.domain.entity.FaturaNfe;
 import com.manutex.pitstop.domain.enums.PlanLimits;
 import com.manutex.pitstop.domain.enums.SubscriptionPlan;
 import com.manutex.pitstop.domain.enums.SubscriptionStatus;
 import com.manutex.pitstop.domain.enums.UserRole;
 import com.manutex.pitstop.domain.repository.AssinaturaRepository;
+import com.manutex.pitstop.domain.repository.AuditLogRepository;
 import com.manutex.pitstop.domain.repository.DocumentoRepository;
 import com.manutex.pitstop.domain.repository.EmpresaRepository;
 import com.manutex.pitstop.domain.repository.FaturaNfeRepository;
@@ -38,8 +41,9 @@ public class BillingService {
     private final ManutencaoRepository   manutencaoRepository;
     private final DocumentoRepository    documentoRepository;
     private final UserRepository         userRepository;
+    private final AuditLogRepository     auditLogRepository;
     private final PaymentGatewayService  paymentGateway;
-    private final TaxInvoiceService      taxInvoiceService;
+    private final SaaSInvoiceService     saasInvoiceService;
     private final PlanEnforcementService planEnforcement;
 
     @Value("${app.frontend-url:http://localhost:4200}")
@@ -169,7 +173,17 @@ public class BillingService {
         atualizarOuCriarAssinatura(empresa, obj.subscription(), SubscriptionStatus.ACTIVE);
         planEnforcement.activateFeaturesForPlan(empresa);
 
-        taxInvoiceService.issueNfse(empresa, amount, gatewayInvoiceId);
+        FaturaNfe fatura = saasInvoiceService.issueNfse(empresa, amount, gatewayInvoiceId);
+
+        auditLogRepository.save(AuditLog.builder()
+            .empresaId(empresa.getId())
+            .action("NFS-E_EMITIDA")
+            .resourceType("FATURA_NFE")
+            .resourceId(fatura.getId() != null ? fatura.getId().toString() : gatewayInvoiceId)
+            .detail("NFS-e SaaS emitida. gatewayInvoiceId=" + gatewayInvoiceId
+                + " valor=" + amount + " status=" + fatura.getNfeStatus())
+            .build());
+
         log.info("Pagamento aprovado processado: empresa={} plano={} valor={}",
             empresa.getId(), empresa.getSubscriptionPlan(), amount);
     }
