@@ -2,6 +2,7 @@ import { Component, inject, signal, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import {
+  FiscalEnvironment,
   FiscalService,
   TenantFiscalConfigResponse,
   TenantFiscalConfigRequest,
@@ -250,7 +251,7 @@ export class TenantFiscalConfigComponent implements OnInit {
     codigoServicoMunicipal: [''],
     itemListaServico:       ['1.01'],
     aliquotaIss:            [2.00],
-    ambienteFiscal:         ['HOMOLOGACAO' as const],
+    ambienteFiscal:         ['HOMOLOGACAO' as FiscalEnvironment],
     fiscalEnabled:          [false],
   });
 
