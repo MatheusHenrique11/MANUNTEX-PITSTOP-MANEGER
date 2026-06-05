@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { SubscriptionService } from '@core/services/subscription.service';
+import { AuthService } from '@core/services/auth.service';
 import { SubscriptionPlan } from '@core/models/subscription.model';
 
 interface Plano {
@@ -96,6 +97,7 @@ interface Plano {
 })
 export class PricingComponent {
   private sub    = inject(SubscriptionService);
+  private auth   = inject(AuthService);
   private router = inject(Router);
 
   readonly carregando = signal<SubscriptionPlan | null>(null);
@@ -151,6 +153,11 @@ export class PricingComponent {
   ];
 
   assinar(plano: SubscriptionPlan): void {
+    if (!this.auth.isAuthenticated()) {
+      this.router.navigate(['/login'], { queryParams: { returnUrl: '/billing/pricing' } });
+      return;
+    }
+
     this.carregando.set(plano);
     this.erro.set(null);
 

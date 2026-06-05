@@ -53,8 +53,8 @@ export const authRefreshInterceptor: HttpInterceptorFn = (req: HttpRequest<unkno
         catchError(refreshError => {
           isRefreshing = false;
           refreshSubject.next(false);
-          // Refresh falhou: sessão encerrada, vai para login
-          router.navigate(['/login'], { queryParams: { expired: true } });
+          const returnUrl = router.url;
+          router.navigate(['/login'], { queryParams: { expired: true, returnUrl } });
           return throwError(() => refreshError);
         })
       );

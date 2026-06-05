@@ -230,10 +230,16 @@ export class LoginComponent {
     password: ['', [Validators.required, Validators.minLength(8)]],
   });
 
+  private returnUrl = '/';
+
   constructor() {
     this.route.queryParams.subscribe(p => {
       if (p['expired'])    this.sessionExpired.set(true);
       if (p['registered']) this.justRegistered.set(true);
+      // Só aceita caminhos relativos para evitar open redirect
+      if (p['returnUrl'] && (p['returnUrl'] as string).startsWith('/')) {
+        this.returnUrl = p['returnUrl'];
+      }
     });
   }
 
@@ -243,7 +249,7 @@ export class LoginComponent {
     this.errorMessage.set(null);
     const { email, password } = this.form.value;
     this.auth.login({ email: email!, password: password! }).subscribe({
-      next: () => this.router.navigate(['/']),
+      next: () => this.router.navigate([this.returnUrl]),
       error: (err) => {
         this.loading.set(false);
         const statusHint = err.status ? ` [${err.status}]` : '';
