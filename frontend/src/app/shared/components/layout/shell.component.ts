@@ -1,4 +1,4 @@
-import { Component, inject, computed, signal } from '@angular/core';
+import { Component, inject, computed, signal, OnInit } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '@core/services/auth.service';
@@ -130,12 +130,21 @@ interface NavItem {
     </div>
   `,
 })
-export class ShellComponent {
+export class ShellComponent implements OnInit {
   private auth = inject(AuthService);
   private featureFlags = inject(FeatureFlagService);
   private router = inject(Router);
 
   readonly sidebarOpen = signal(false);
+
+  ngOnInit() {
+    // Carrega as feature flags aqui — após authGuard confirmar autenticação.
+    // Garante que tryRestoreSession() e authRefreshInterceptor não correm
+    // em paralelo (race condition que causa replay de refresh token).
+    this.featureFlags.load().subscribe({
+      error: () => { /* flags indisponíveis: menus admin ainda funcionam via isAdmin() */ }
+    });
+  }
 
   private readonly NAV_ITEMS: NavItem[] = [
     { label: 'Dashboard',   path: '/dashboard',         icon: '▦' },
